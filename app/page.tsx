@@ -32,21 +32,32 @@ export default function Home() {
         Explain My Salary
       </button>
 
-      {show && salary && (
-        <div style={{ marginTop: "30px" }}>
-          <h2>Explanation</h2>
+      {show && salary && (() => {
+  const monthlySalary = Number(salary);
+  const basic = monthlySalary * 0.4;
+  const pf = basic * 0.12;
+  const inHand = monthlySalary - pf;
 
-          <p>
-            <b>English:</b> From your salary, some amount is deducted for Provident
-            Fund (PF) and other benefits. This helps you save money for the future.
-          </p>
+  return (
+    <div style={{ marginTop: "30px" }}>
+      <h2>Salary Breakdown</h2>
 
-          <p>
-            <b>हिंदी:</b> आपकी सैलरी से पीएफ (Provident Fund) और अन्य सुविधाओं के
-            लिए कुछ पैसे काटे जाते हैं। यह भविष्य के लिए आपकी बचत होती है।
-          </p>
-        </div>
-      )}
-    </main>
+      <p><b>Monthly Salary:</b> ₹{monthlySalary.toFixed(0)}</p>
+      <p><b>Basic Salary (40%):</b> ₹{basic.toFixed(0)}</p>
+      <p><b>PF Deduction (12% of Basic):</b> ₹{pf.toFixed(0)}</p>
+      <p><b>Approx In-Hand Salary:</b> ₹{inHand.toFixed(0)}</p>
+
+      <hr />
+
+      <p>
+        <b>English:</b> Your employer calculates PF on basic salary.
+        This amount is deducted every month to build your retirement savings.
+      </p>
+
+      <p>
+        <b>हिंदी:</b> आपकी बेसिक सैलरी पर पीएफ की गणना होती है।
+        यह राशि हर महीने काटी जाती है ताकि भविष्य के लिए बचत हो सके।
+      </p>
+    </div>
   );
-}
+})()}
