@@ -18,6 +18,12 @@ export default function Home() {
       en: "HRA is given to help employees pay house rent if they are not using government accommodation.",
       hi: "हाउस रेंट अलाउंस (एचआरए) किराए के मकान के खर्च में मदद के लिए दिया जाता है।",
     },
+    {
+  title: "Transport Allowance",
+  amount: 3600,
+  en: "Transport allowance is given to cover daily commuting expenses.",
+  hi: "ट्रांसपोर्ट अलाउंस रोज़ाना आने-जाने के खर्च के लिए दिया जाता है।"
+},
   ];
 
   const deductions = [
