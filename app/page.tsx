@@ -115,8 +115,11 @@ export default function Home() {
           <h3>
             {item.title} – ₹{item.amount}
           </h3>
-          <p>{item.explanation.en}</p>
+         <p>{item.explanation.en}</p>
 <p>{item.explanation.hi}</p>
+
+<p><b>Calculation:</b> {item.calculation}</p>
+<p><b>Current Rate:</b> {item.currentRate}</p>
         </div>
       ))}
 
