@@ -110,19 +110,31 @@ export default function Home() {
       <h1>Salary Slip Explainer</h1>
 
       <h2>Earnings</h2>
-      {earnings.map((item, index) => (
-        <div key={index}>
-          <h3>
-            {item.title} – ₹{item.amount}
-          </h3>
-         <p>{item.explanation.en}</p>
-<p>{item.explanation.hi}</p>
-<p><b>Applies To:</b> {item.appliesTo}</p>
-<p><b>Calculation:</b> {item.calculation}</p>
-<p><b>Last Revised:</b> {item.lastRevised}</p>
-<p><b>Arrears:</b> {item.arrearsApplicable}</p>
-        </div>
-      ))}
+{earnings.map((item, index) => (
+  <div key={index}>
+    <h3>
+      {item.title} – ₹{item.amount}
+    </h3>
+
+    <p>{item.explanation.en}</p>
+    <p>{item.explanation.hi}</p>
+
+    <p><b>Applies To:</b> {item.appliesTo}</p>
+    <p><b>Calculation:</b> {item.calculation}</p>
+    <p><b>Current Rate:</b> {item.currentRate}</p>
+    <p><b>Last Revised:</b> {item.lastRevised}</p>
+    <p><b>Arrears Applicable:</b> {item.arrearsApplicable}</p>
+
+    <p>
+      <b>Official Order:</b>{" "}
+      <a href={item.orderLink} target="_blank">
+        View Government Order
+      </a>
+    </p>
+
+    <hr />
+  </div>
+))}
 
       <h2>Deductions</h2>
       {deductions.map((item, index) => (
