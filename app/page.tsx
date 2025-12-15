@@ -1,115 +1,65 @@
-// ===== Salary Slip Sample Data (MVP v1) =====
-
-const earnings = [
-  {
-    key: "basic_pay",
-    name: "Basic Pay",
-    amount: 26300,
-    explanation_en: "Basic Pay is the main fixed part of your salary. Increments are usually added here.",
-    explanation_hi: "बेसिक पे आपकी सैलरी का मुख्य हिस्सा होता है। इंक्रीमेंट आमतौर पर यहीं जुड़ता है।"
-  },
-  {
-    key: "da",
-    name: "Dearness Allowance (DA)",
-    amount: 13939,
-    explanation_en: "DA is given to reduce the impact of inflation. It is calculated as a percentage of Basic Pay.",
-    explanation_hi: "महंगाई भत्ता (DA) महंगाई के प्रभाव को कम करने के लिए दिया जाता है।"
-  },
-  {
-    key: "hra",
-    name: "House Rent Allowance (HRA)",
-    amount: 7890,
-    explanation_en: "HRA is provided to help cover house rent expenses.",
-    explanation_hi: "HRA घर के किराये के खर्च को पूरा करने के लिए दिया जाता है।"
-  },
-  {
-    key: "ta",
-    name: "Transport Allowance",
-    amount: 3600,
-    explanation_en: "Transport Allowance is given for daily travel expenses.",
-    explanation_hi: "ट्रांसपोर्ट अलाउंस रोज़ाना आने-जाने के खर्च के लिए दिया जाता है।"
-  }
-];
-
-const deductions = [
-  {
-    key: "nps",
-    name: "NPS Contribution",
-    amount: 4024,
-    explanation_en: "NPS is a retirement pension scheme. This amount is deducted and invested for your future.",
-    explanation_hi: "NPS एक पेंशन योजना है। यह राशि भविष्य के लिए निवेश की जाती है।"
-  },
-  {
-    key: "pt",
-    name: "Professional Tax",
-    amount: 200,
-    explanation_en: "Professional Tax is a state-level tax on salaried employees.",
-    explanation_hi: "प्रोफेशनल टैक्स राज्य सरकार द्वारा लिया जाने वाला कर है।"
-  }
-];
-
 export default function Home() {
+  const earnings = [
+    {
+      title: "Basic Pay",
+      amount: 26300,
+      en: "Basic Pay is the core salary. All increments, DA, HRA are calculated based on this.",
+      hi: "बेसिक पे वेतन का मुख्य हिस्सा होता है। सभी बढ़ोतरी, डीए और एचआरए इसी पर आधारित होते हैं।",
+    },
+    {
+      title: "Dearness Allowance (DA)",
+      amount: 13939,
+      en: "DA is given to reduce the impact of inflation and is calculated as a percentage of Basic Pay.",
+      hi: "महंगाई भत्ता (डीए) महंगाई के असर को कम करने के लिए दिया जाता है और यह बेसिक पे पर आधारित होता है।",
+    },
+    {
+      title: "House Rent Allowance (HRA)",
+      amount: 7890,
+      en: "HRA helps employees pay house rent if they are not using government accommodation.",
+      hi: "हाउस रेंट अलाउंस (एचआरए) किराए के मकान के खर्च में मदद के लिए दिया जाता है।",
+    },
+  ];
+
+  const deductions = [
+    {
+      title: "NPS Contribution",
+      amount: 4024,
+      en: "NPS is a retirement pension contribution deducted as per government rules.",
+      hi: "एनपीएस एक पेंशन योजना है जिसमें रिटायरमेंट के लिए वेतन से कटौती की जाती है।",
+    },
+    {
+      title: "Professional Tax",
+      amount: 200,
+      en: "Professional tax is a state tax deducted from salary as per state law.",
+      hi: "प्रोफेशनल टैक्स राज्य सरकार द्वारा वेतन से काटा जाने वाला कर है।",
+    },
+  ];
+
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h1>Salary Slip Explainer</h1>
 
-      <label>Enter Monthly Salary:</label>
-      <br />
-      <input type="number" placeholder="e.g. 50000" />
-      
-      <hr />
+      <h2>Earnings</h2>
+      {earnings.map((item, index) => (
+        <div key={index} style={{ marginBottom: "20px" }}>
+          <strong>
+            {item.title} – ₹{item.amount}
+          </strong>
+          <p>{item.en}</p>
+          <p>{item.hi}</p>
+        </div>
+      ))}
 
-      <h2>Earnings (कमाई)</h2>
-
-      <ul>
-        <li>
-          <strong>Basic Pay</strong><br />
-          English: Fixed base salary decided by pay level.<br />
-          हिंदी: मूल वेतन जो पे लेवल के अनुसार तय होता है।
-        </li>
-
-        <li>
-          <strong>Dearness Allowance (DA)</strong><br />
-          English: Compensation for inflation, revised periodically.<br />
-          हिंदी: महंगाई से निपटने के लिए दिया जाने वाला भत्ता।
-        </li>
-
-        <li>
-          <strong>House Rent Allowance (HRA)</strong><br />
-          English: Given if employee lives in rented house.<br />
-          हिंदी: किराए के घर में रहने पर मिलने वाला भत्ता।
-        </li>
-
-        <li>
-          <strong>Transport Allowance</strong><br />
-          English: Helps cover daily travel expenses.<br />
-          हिंदी: रोज़ाना यात्रा खर्च के लिए दिया जाता है।
-        </li>
-      </ul>
-
-      <hr />
-
-      <h2>Deductions (कटौती)</h2>
-
-      <ul>
-        <li>
-          <strong>NPS Contribution</strong><br />
-          English: Pension contribution deducted monthly.<br />
-          हिंदी: पेंशन के लिए हर महीने की जाने वाली कटौती।
-        </li>
-
-        <li>
-          <strong>CGEGIS</strong><br />
-          English: Government insurance and savings scheme.<br />
-          हिंदी: सरकारी बीमा और बचत योजना।
-        </li>
-
-        <li>
-          <strong>Professional Tax</strong><br />
-          English: State tax on profession or employment.<br />
-          हिंदी: राज्य सरकार द्वारा लगाया गया कर।
-        </li>
-      </ul>
+      <h2>Deductions</h2>
+      {deductions.map((item, index) => (
+        <div key={index} style={{ marginBottom: "20px" }}>
+          <strong>
+            {item.title} – ₹{item.amount}
+          </strong>
+          <p>{item.en}</p>
+          <p>{item.hi}</p>
+        </div>
+      ))}
     </div>
   );
 }
