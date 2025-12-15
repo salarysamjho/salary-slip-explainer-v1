@@ -109,9 +109,16 @@ export default function Home() {
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h1>Salary Slip Explainer</h1>
 
-      <h2>Earnings</h2>
-{earnings.map((item, index) => (
-  <div key={index}>
+      {earnings.map((item, index) => (
+  <div
+    key={index}
+    style={{
+      border: "1px solid #ddd",
+      padding: "15px",
+      marginBottom: "15px",
+      borderRadius: "6px"
+    }}
+  >
     <h3>
       {item.title} – ₹{item.amount}
     </h3>
@@ -138,7 +145,15 @@ export default function Home() {
 
       <h2>Deductions</h2>
       {deductions.map((item, index) => (
-        <div key={index}>
+        <div  
+         key={index}
+    style={{
+      border: "1px solid #ddd",
+      padding: "15px",
+      marginBottom: "15px",
+      borderRadius: "6px"
+    }}
+  >
           <h3>
             {item.title} – ₹{item.amount}
           </h3>
