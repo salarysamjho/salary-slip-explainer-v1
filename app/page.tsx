@@ -109,14 +109,15 @@ export default function Home() {
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h1>Salary Slip Explainer</h1>
 
-      {earnings.map((item, index) => (
+     <h2>Earnings</h2>
+{earnings.map((item, index) => (
   <div
     key={index}
     style={{
       border: "1px solid #ddd",
       padding: "15px",
       marginBottom: "15px",
-      borderRadius: "6px"
+      borderRadius: "6px",
     }}
   >
     <h3>
@@ -138,8 +139,6 @@ export default function Home() {
         View Government Order
       </a>
     </p>
-
-    <hr />
   </div>
 ))}
 
