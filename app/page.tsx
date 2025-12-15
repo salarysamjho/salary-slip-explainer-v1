@@ -1,3 +1,53 @@
+// ===== Salary Slip Sample Data (MVP v1) =====
+
+const earnings = [
+  {
+    key: "basic_pay",
+    name: "Basic Pay",
+    amount: 26300,
+    explanation_en: "Basic Pay is the main fixed part of your salary. Increments are usually added here.",
+    explanation_hi: "बेसिक पे आपकी सैलरी का मुख्य हिस्सा होता है। इंक्रीमेंट आमतौर पर यहीं जुड़ता है।"
+  },
+  {
+    key: "da",
+    name: "Dearness Allowance (DA)",
+    amount: 13939,
+    explanation_en: "DA is given to reduce the impact of inflation. It is calculated as a percentage of Basic Pay.",
+    explanation_hi: "महंगाई भत्ता (DA) महंगाई के प्रभाव को कम करने के लिए दिया जाता है।"
+  },
+  {
+    key: "hra",
+    name: "House Rent Allowance (HRA)",
+    amount: 7890,
+    explanation_en: "HRA is provided to help cover house rent expenses.",
+    explanation_hi: "HRA घर के किराये के खर्च को पूरा करने के लिए दिया जाता है।"
+  },
+  {
+    key: "ta",
+    name: "Transport Allowance",
+    amount: 3600,
+    explanation_en: "Transport Allowance is given for daily travel expenses.",
+    explanation_hi: "ट्रांसपोर्ट अलाउंस रोज़ाना आने-जाने के खर्च के लिए दिया जाता है।"
+  }
+];
+
+const deductions = [
+  {
+    key: "nps",
+    name: "NPS Contribution",
+    amount: 4024,
+    explanation_en: "NPS is a retirement pension scheme. This amount is deducted and invested for your future.",
+    explanation_hi: "NPS एक पेंशन योजना है। यह राशि भविष्य के लिए निवेश की जाती है।"
+  },
+  {
+    key: "pt",
+    name: "Professional Tax",
+    amount: 200,
+    explanation_en: "Professional Tax is a state-level tax on salaried employees.",
+    explanation_hi: "प्रोफेशनल टैक्स राज्य सरकार द्वारा लिया जाने वाला कर है।"
+  }
+];
+
 export default function Home() {
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
