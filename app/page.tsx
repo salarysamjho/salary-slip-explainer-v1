@@ -115,8 +115,8 @@ export default function Home() {
           <h3>
             {item.title} – ₹{item.amount}
           </h3>
-          <p>{item.en}</p>
-          <p>{item.hi}</p>
+          <p>{item.explanation.en}</p>
+<p>{item.explanation.hi}</p>
         </div>
       ))}
 
@@ -126,8 +126,8 @@ export default function Home() {
           <h3>
             {item.title} – ₹{item.amount}
           </h3>
-          <p>{item.en}</p>
-          <p>{item.hi}</p>
+         <p>{item.explanation.en}</p>
+<p>{item.explanation.hi}</p>
         </div>
       ))}
     </div>
