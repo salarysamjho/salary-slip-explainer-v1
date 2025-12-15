@@ -1,11 +1,11 @@
 export default function Home() {
   const earnings = [
     {
-      title: "Basic Pay",
-      amount: 26300,
-      en: "Basic Pay is the core salary. All increments, DA, and HRA are calculated based on this. As per the 7th Pay Commission, annual increment is 3% of the Basic Pay.",
-      hi: "बेसिक पे वेतन का मुख्य हिस्सा होता है। सभी बढ़ोतरी, डीए और एचआरए इसी पर आधारित होते हैं। 7वें वेतन आयोग के अनुसार हर साल बेसिक पे का 3% वार्षिक इंक्रीमेंट दिया जाता है।",
-    },
+  title: "Basic Pay",
+  amount: 26300,
+  en: "Basic Pay is the core salary. All increments, DA, and HRA are calculated based on this. As per the 7th Pay Commission, annual increment is 3% of the Basic Pay.",
+  hi: "बेसिक पे वेतन का मुख्य हिस्सा होता है। सभी बढ़ोतरी, डीए और एचआरए इसी पर आधारित होते हैं। 7वें वेतन आयोग के अनुसार हर साल बेसिक पे का 3% वार्षिक इंक्रीमेंट दिया जाता है।",
+},
     {
       title: "Dearness Allowance (DA)",
       amount: 13939,
