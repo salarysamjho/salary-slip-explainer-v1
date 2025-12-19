@@ -70,22 +70,39 @@ export default function Home() {
 ];
 
   const deductions = [
-  {
-    id: "nps",
-    title: "NPS Contribution",
-    amount: 4024,
-    appliesTo: "Government Employees (Joined after 2004)",
-    calculation: "10% of Basic + DA",
-    currentRate: "10% (Employee) + 14% (Govt)",
-    lastRevised: "April 2019",
-    arrearsApplicable: "No",
-    legalBasis: "PFRDA Act",
-    orderLink: "https://pfrda.org.in/",
-    explanation: {
-      en: "NPS is a retirement pension scheme.",
-      hi: "एनपीएस एक पेंशन योजना है जो रिटायरमेंट के लिए होती है।",
-    },
+    {
+  id: "nps",
+  title: "NPS Contribution",
+  amount: 4024,
+
+  appliesTo: "Central Government Employees (Joined on or after 01-01-2004)",
+
+  calculation:
+    "Employee contributes 10% of (Basic Pay + DA). Government contributes 14% of (Basic Pay + DA).",
+
+  currentRate:
+    "Employee: 10% | Government: 14% of Basic Pay + DA",
+
+  lastRevised:
+    "Government contribution increased from 10% to 14% w.e.f. 01 April 2019",
+
+  arrearsApplicable:
+    "No arrears applicable as contribution is prospective",
+
+  legalBasis:
+    "PFRDA Act, 2013",
+
+  orderLink:
+    "https://egazette.nic.in/WriteReadData/2019/210206.pdf",
+
+  explanation: {
+    en:
+      "The National Pension System (NPS) is a mandatory retirement savings scheme for Central Government employees joining service on or after 1 January 2004. Employees contribute 10% of their Basic Pay plus Dearness Allowance, while the Government contributes 14%. The accumulated corpus is paid as pension after retirement.",
+
+    hi:
+      "नेशनल पेंशन सिस्टम (NPS) एक अनिवार्य रिटायरमेंट पेंशन योजना है जो 1 जनवरी 2004 के बाद नियुक्त केंद्रीय सरकारी कर्मचारियों पर लागू होती है। कर्मचारी अपने बेसिक वेतन और महंगाई भत्ते का 10% योगदान करते हैं, जबकि सरकार 14% योगदान करती है। रिटायरमेंट के बाद यही राशि पेंशन के रूप में दी जाती है।",
   },
+},
 
   {
     id: "pt",
