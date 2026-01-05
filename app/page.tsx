@@ -1,5 +1,10 @@
+'use client';
+
+import { useState } from "react";
+
 export default function HomePage() {
   const isPremiumUser = false; // keep false for now
+  const [viewMode, setViewMode] = useState<"monthly" | "annual">("monthly");
 
   const earnings = [
     {
@@ -33,10 +38,8 @@ export default function HomePage() {
     {
       title: "House Rent Allowance (HRA)",
       amount: "₹7,890",
-      explanationEn:
-        "HRA helps employees meet house rent expenses.",
-      explanationHi:
-        "एचआरए कर्मचारियों को घर का किराया चुकाने में मदद करता है।",
+      explanationEn: "HRA helps employees meet house rent expenses.",
+      explanationHi: "एचआरए कर्मचारियों को घर का किराया चुकाने में मदद करता है।",
       appliesTo: "Employees not using government accommodation",
       calculation: "Percentage of Basic Pay (+ DA in some cases)",
       currentRate: "8% / 16% / 24% depending on city category",
@@ -47,10 +50,8 @@ export default function HomePage() {
     {
       title: "Transport Allowance",
       amount: "₹3,600",
-      explanationEn:
-        "Transport Allowance covers daily commuting expenses.",
-      explanationHi:
-        "ट्रांसपोर्ट अलाउंस रोज़ाना आने-जाने के खर्च के लिए दिया जाता है।",
+      explanationEn: "Transport Allowance covers daily commuting expenses.",
+      explanationHi: "ट्रांसपोर्ट अलाउंस रोज़ाना आने-जाने के खर्च के लिए दिया जाता है।",
       appliesTo: "Most Government Employees",
       calculation: "Fixed amount based on Pay Level",
       currentRate: "₹1,800 – ₹7,200 + DA",
@@ -79,10 +80,8 @@ export default function HomePage() {
     {
       title: "Professional Tax",
       amount: "₹200",
-      explanationEn:
-        "Professional tax is levied by state governments.",
-      explanationHi:
-        "प्रोफेशनल टैक्स राज्य सरकार द्वारा लगाया जाता है।",
+      explanationEn: "Professional tax is levied by state governments.",
+      explanationHi: "प्रोफेशनल टैक्स राज्य सरकार द्वारा लगाया जाता है।",
       appliesTo: "State-specific",
       calculation: "Fixed slab as per state law",
       lastRevised: "State Government Notification",
@@ -91,19 +90,18 @@ export default function HomePage() {
     },
   ];
 
-  // --- Step 11: Salary Calculations ---
   const parseAmount = (value: string) =>
     Number(value.replace(/[₹,]/g, ""));
 
-  const grossSalary = earnings.reduce(
-    (sum, item) => sum + parseAmount(item.amount),
-    0
-  );
+  const multiplier = viewMode === "monthly" ? 1 : 12;
 
-  const totalDeductions = deductions.reduce(
-    (sum, item) => sum + parseAmount(item.amount),
-    0
-  );
+  const grossSalary =
+    earnings.reduce((sum, item) => sum + parseAmount(item.amount), 0) *
+    multiplier;
+
+  const totalDeductions =
+    deductions.reduce((sum, item) => sum + parseAmount(item.amount), 0) *
+    multiplier;
 
   const netSalary = grossSalary - totalDeductions;
 
@@ -111,7 +109,37 @@ export default function HomePage() {
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
 
-      {/* SALARY SUMMARY */}
+      {/* TOGGLE */}
+      <div style={{ marginBottom: "15px" }}>
+        <button
+          onClick={() => setViewMode("monthly")}
+          style={{
+            marginRight: "10px",
+            padding: "6px 12px",
+            background: viewMode === "monthly" ? "#000" : "#ddd",
+            color: viewMode === "monthly" ? "#fff" : "#000",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Monthly
+        </button>
+
+        <button
+          onClick={() => setViewMode("annual")}
+          style={{
+            padding: "6px 12px",
+            background: viewMode === "annual" ? "#000" : "#ddd",
+            color: viewMode === "annual" ? "#fff" : "#000",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Annual
+        </button>
+      </div>
+
+      {/* SUMMARY */}
       <div
         style={{
           border: "2px solid #000",
@@ -121,56 +149,31 @@ export default function HomePage() {
           backgroundColor: "#f9f9f9",
         }}
       >
-        <h2>Salary Summary</h2>
+        <h2>Salary Summary ({viewMode === "monthly" ? "Monthly" : "Annual"})</h2>
 
         <p><b>Gross Salary:</b> ₹{grossSalary.toLocaleString()}</p>
         <p><b>Total Deductions:</b> ₹{totalDeductions.toLocaleString()}</p>
         <p style={{ fontSize: "18px" }}>
           <b>Net (Take-Home) Salary:</b> ₹{netSalary.toLocaleString()}
         </p>
-
-        <p>
-          <b>English:</b> Net salary is the amount you actually receive after
-          all deductions are subtracted from your gross salary.
-        </p>
-        <p>
-          <b>हिंदी:</b> नेट सैलरी वह राशि होती है जो सभी कटौतियाँ हटाने के बाद
-          आपको वास्तव में मिलती है।
-        </p>
       </div>
 
       {/* EARNINGS */}
       <h2>Earnings</h2>
       {earnings.map((item, index) => (
-        <div
-          key={index}
-          style={{
-            border: "1px solid #ddd",
-            padding: "15px",
-            marginBottom: "20px",
-            borderRadius: "6px",
-          }}
-        >
+        <div key={index} style={{ border: "1px solid #ddd", padding: "15px", marginBottom: "20px", borderRadius: "6px" }}>
           <h3>{item.title} – {item.amount}</h3>
-
           <p>{item.explanationEn}</p>
           <p>{item.explanationHi}</p>
-
           <p><b>Applies To:</b> {item.appliesTo}</p>
           <p><b>Calculation:</b> {item.calculation}</p>
-
-          {item.currentRate && (
-            <p><b>Current Rate:</b> {item.currentRate}</p>
-          )}
-
+          {item.currentRate && <p><b>Current Rate:</b> {item.currentRate}</p>}
           <p><b>Last Revised:</b> {item.lastRevised}</p>
           <p><b>Arrears Applicable:</b> {item.arrears}</p>
 
           {item.orderLink &&
             (isPremiumUser ? (
-              <a href={item.orderLink} target="_blank">
-                View Government Order
-              </a>
+              <a href={item.orderLink} target="_blank">View Government Order</a>
             ) : (
               <span style={{ color: "gray" }}>🔒 Premium Only</span>
             ))}
@@ -180,20 +183,10 @@ export default function HomePage() {
       {/* DEDUCTIONS */}
       <h2>Deductions</h2>
       {deductions.map((item, index) => (
-        <div
-          key={index}
-          style={{
-            border: "1px solid #ddd",
-            padding: "15px",
-            marginBottom: "20px",
-            borderRadius: "6px",
-          }}
-        >
+        <div key={index} style={{ border: "1px solid #ddd", padding: "15px", marginBottom: "20px", borderRadius: "6px" }}>
           <h3>{item.title} – {item.amount}</h3>
-
           <p>{item.explanationEn}</p>
           <p>{item.explanationHi}</p>
-
           <p><b>Applies To:</b> {item.appliesTo}</p>
           <p><b>Calculation:</b> {item.calculation}</p>
           <p><b>Last Revised:</b> {item.lastRevised}</p>
@@ -201,9 +194,7 @@ export default function HomePage() {
 
           {item.orderLink &&
             (isPremiumUser ? (
-              <a href={item.orderLink} target="_blank">
-                View Government Order
-              </a>
+              <a href={item.orderLink} target="_blank">View Government Order</a>
             ) : (
               <span style={{ color: "gray" }}>🔒 Premium Only</span>
             ))}
