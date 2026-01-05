@@ -151,13 +151,15 @@ export default function Home() {
     <p><b>Arrears Applicable:</b> {item.arrearsApplicable}</p>
 
     <p>
-      <b>Official Order:</b>{" "}
-      <a href={item.orderLink} target="_blank">
-        View Government Order
-      </a>
-    </p>
-  </div>
-))}
+      {isPremiumUser ? (
+  <a href={item.orderLink} target="_blank">
+    View Government Order
+  </a>
+) : (
+  <span style={{ color: "gray" }}>
+    🔒 Premium Only
+  </span>
+)}
 
       <h2>Deductions</h2>
       {deductions.map((item, index) => (
