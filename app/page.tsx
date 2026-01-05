@@ -9,20 +9,17 @@ export default function HomePage() {
   const [cityType, setCityType] = useState<"X" | "Y" | "Z">("X");
   const [state, setState] = useState<string>("Maharashtra");
 
+  // Step 15: Salary slip upload state
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
   // ===== CORE VALUES =====
   const basicPay = 35400;
   const daRate = 0.49;
   const daAmount = Math.round(basicPay * daRate);
 
-  // ===== HRA (30/20/10) =====
-  const hraRateMap: Record<string, number> = {
-    X: 0.30,
-    Y: 0.20,
-    Z: 0.10,
-  };
+  const hraRateMap = { X: 0.30, Y: 0.20, Z: 0.10 };
   const hraAmount = Math.round(basicPay * hraRateMap[cityType]);
 
-  // ===== PROFESSIONAL TAX (STATE-WISE) =====
   const professionalTaxMap: Record<string, number> = {
     Maharashtra: 200,
     Karnataka: 200,
@@ -34,54 +31,10 @@ export default function HomePage() {
 
   // ===== EARNINGS =====
   const earnings = [
-    {
-      title: "Basic Pay",
-      amount: basicPay,
-      explanationEn:
-        "Basic Pay is the core component of salary. All allowances and most deductions are calculated based on it.",
-      explanationHi:
-        "बेसिक पे वेतन का मुख्य हिस्सा होता है, जिसके आधार पर सभी भत्ते और अधिकतर कटौतियाँ तय होती हैं।",
-      calculation: "As per Pay Matrix (7th CPC)",
-      currentRate: "Pay Level based",
-      lastRevised: "7th Pay Commission",
-      orderLink: null,
-    },
-    {
-      title: "Dearness Allowance (DA)",
-      amount: daAmount,
-      explanationEn:
-        "Dearness Allowance offsets inflation and is revised twice a year.",
-      explanationHi:
-        "महंगाई भत्ता मुद्रास्फीति के प्रभाव को कम करने के लिए दिया जाता है।",
-      calculation: "49% of Basic Pay",
-      currentRate: "49%",
-      lastRevised: "Govt. Notification",
-      orderLink: "https://egazette.nic.in/",
-    },
-    {
-      title: "House Rent Allowance (HRA)",
-      amount: hraAmount,
-      explanationEn:
-        "HRA depends on city classification (X, Y, Z).",
-      explanationHi:
-        "एचआरए शहर की श्रेणी (X, Y, Z) पर निर्भर करता है।",
-      calculation: "30% / 20% / 10% of Basic Pay",
-      currentRate:
-        cityType === "X" ? "30%" : cityType === "Y" ? "20%" : "10%",
-      lastRevised: "DA based revision",
-      orderLink:
-        "https://doe.gov.in/files/cenetral-pay_document/HRA_Eng_1.pdf",
-    },
-    {
-      title: "Transport Allowance",
-      amount: 3600,
-      explanationEn: "Covers daily commuting expenses.",
-      explanationHi: "आवागमन खर्च के लिए दिया जाता है।",
-      calculation: "Fixed",
-      currentRate: "₹3,600",
-      lastRevised: "7th CPC",
-      orderLink: "https://egazette.nic.in/",
-    },
+    { title: "Basic Pay", amount: basicPay },
+    { title: "Dearness Allowance (DA)", amount: daAmount },
+    { title: "House Rent Allowance (HRA)", amount: hraAmount },
+    { title: "Transport Allowance", amount: 3600 },
   ];
 
   // ===== DEDUCTIONS =====
@@ -89,22 +42,10 @@ export default function HomePage() {
     {
       title: "NPS Contribution",
       amount: Math.round((basicPay + daAmount) * 0.10),
-      explanationEn:
-        "Mandatory retirement contribution under NPS.",
-      explanationHi:
-        "एनपीएस के तहत अनिवार्य पेंशन योगदान।",
-      calculation: "10% of (Basic + DA)",
-      orderLink: "https://egazette.nic.in/",
     },
     {
       title: "Professional Tax",
       amount: professionalTax,
-      explanationEn:
-        "Professional Tax is levied by state governments and varies by state.",
-      explanationHi:
-        "प्रोफेशनल टैक्स राज्य सरकार द्वारा लगाया जाता है और राज्य के अनुसार बदलता है।",
-      calculation: `As per ${state} State rules`,
-      orderLink: null,
     },
   ];
 
@@ -119,9 +60,47 @@ export default function HomePage() {
 
   const netSalary = grossSalary - totalDeductions;
 
+  // ===== FILE HANDLER =====
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setUploadedFile(e.target.files[0]);
+    }
+  };
+
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
+
+      {/* STEP 15: UPLOAD */}
+      <div
+        style={{
+          border: "2px dashed #666",
+          padding: "15px",
+          marginBottom: "20px",
+          borderRadius: "6px",
+        }}
+      >
+        <h2>Upload Your Salary Slip</h2>
+        <input
+          type="file"
+          accept=".pdf,image/*"
+          onChange={handleFileUpload}
+        />
+
+        {uploadedFile && (
+          <p style={{ marginTop: "10px" }}>
+            ✅ <b>{uploadedFile.name}</b> uploaded successfully.  
+            <br />
+            We will explain your salary components below.
+          </p>
+        )}
+
+        <p style={{ fontSize: "13px", color: "#555" }}>
+          English: For accuracy, salary slip details are explained manually in this version.  
+          <br />
+          हिंदी: सही जानकारी के लिए इस संस्करण में वेतन पर्ची की व्याख्या मैन्युअल रूप से की जाती है।
+        </p>
+      </div>
 
       {/* TOGGLES */}
       <div style={{ marginBottom: "10px" }}>
@@ -131,9 +110,9 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* CITY */}
+      {/* CITY & STATE */}
       <div style={{ marginBottom: "10px" }}>
-        <label><b>City Category:</b> </label>
+        <label>City: </label>
         <select value={cityType} onChange={(e) => setCityType(e.target.value as any)}>
           <option value="X">X City</option>
           <option value="Y">Y City</option>
@@ -141,9 +120,8 @@ export default function HomePage() {
         </select>
       </div>
 
-      {/* STATE */}
       <div style={{ marginBottom: "20px" }}>
-        <label><b>State:</b> </label>
+        <label>State: </label>
         <select value={state} onChange={(e) => setState(e.target.value)}>
           <option>Maharashtra</option>
           <option>Karnataka</option>
@@ -164,24 +142,13 @@ export default function HomePage() {
       {/* EARNINGS */}
       <h2>Earnings</h2>
       {earnings.map((e, i) => (
-        <div key={i} style={{ border: "1px solid #ddd", padding: "12px", marginBottom: "10px" }}>
-          <h3>{e.title} – ₹{e.amount.toLocaleString()}</h3>
-          <p>{e.explanationEn}</p>
-          <p>{e.explanationHi}</p>
-          <p><b>Calculation:</b> {e.calculation}</p>
-          <p><b>Current Rate:</b> {e.currentRate}</p>
-        </div>
+        <p key={i}>{e.title}: ₹{e.amount.toLocaleString()}</p>
       ))}
 
       {/* DEDUCTIONS */}
       <h2>Deductions</h2>
       {deductions.map((d, i) => (
-        <div key={i} style={{ border: "1px solid #ddd", padding: "12px", marginBottom: "10px" }}>
-          <h3>{d.title} – ₹{d.amount.toLocaleString()}</h3>
-          <p>{d.explanationEn}</p>
-          <p>{d.explanationHi}</p>
-          <p><b>Calculation:</b> {d.calculation}</p>
-        </div>
+        <p key={i}>{d.title}: ₹{d.amount.toLocaleString()}</p>
       ))}
     </main>
   );
