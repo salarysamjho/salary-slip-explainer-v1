@@ -1,57 +1,58 @@
 export default function HomePage() {
-  const isPremiumUser = false; // change to true later
+  const isPremiumUser = false; // keep false for now
 
-  const salaryBasics = [
+  const earnings = [
     {
       title: "Basic Pay",
       amount: "₹35,400",
       explanationEn:
-        "Basic Pay is the core component of salary and forms the basis for most allowances and deductions.",
+        "Basic Pay is the core component of salary. All allowances and most deductions are calculated on the basis of Basic Pay.",
       explanationHi:
-        "बेसिक पे वेतन का मुख्य हिस्सा होता है और इसी के आधार पर अधिकतर भत्ते और कटौतियाँ तय होती हैं।",
+        "बेसिक पे वेतन का मुख्य हिस्सा होता है। सभी भत्ते और अधिकतर कटौतियाँ इसी के आधार पर तय होती हैं।",
       appliesTo: "All Government Employees",
-      calculation: "As per Pay Level under 7th Pay Commission",
-      lastRevised: "7th Pay Commission",
+      calculation: "Fixed as per Pay Level under 7th Pay Commission",
+      currentRate: "Pay Level based (7th CPC Pay Matrix)",
+      lastRevised: "7th Pay Commission (2016)",
+      arrears: "Yes, if revision is delayed",
+      orderLink: null, // no GO link for basic pay
     },
     {
       title: "Dearness Allowance (DA)",
       amount: "₹17,346",
       explanationEn:
-        "Dearness Allowance is paid to offset the impact of inflation on employees.",
+        "Dearness Allowance is paid to reduce the impact of inflation. It is revised twice every year based on CPI data.",
       explanationHi:
-        "महंगाई भत्ता कर्मचारियों को महंगाई के प्रभाव से राहत देने के लिए दिया जाता है।",
+        "महंगाई भत्ता महंगाई के प्रभाव को कम करने के लिए दिया जाता है। इसे साल में दो बार संशोधित किया जाता है।",
       appliesTo: "All Government Employees",
       calculation: "Percentage of Basic Pay",
-      currentRate: "49% of Basic Pay (as applicable)",
-      lastRevised: "Revised periodically by Government",
-      arrears: "Yes (whenever revised)",
+      currentRate: "49% of Basic Pay",
+      lastRevised: "Revised by Government (Jan / July)",
+      arrears: "Yes, paid from effective date",
+      orderLink: "https://egazette.nic.in/", // premium locked
     },
-  ];
-
-  const earnings = [
     {
       title: "House Rent Allowance (HRA)",
       amount: "₹7,890",
-      explanationEn: "HRA helps employees pay house rent.",
-      explanationHi: "एचआरए कर्मचारियों को किराया चुकाने में सहायता करता है।",
+      explanationEn: "HRA helps employees meet house rent expenses.",
+      explanationHi: "एचआरए कर्मचारियों को घर का किराया चुकाने में मदद करता है।",
       appliesTo: "Employees not using government accommodation",
       calculation: "Percentage of Basic Pay (+ DA in some cases)",
-      currentRate: "8% / 16% / 24% depending on city",
+      currentRate: "8% / 16% / 24% depending on city category",
       lastRevised: "7th Pay Commission",
       arrears: "Sometimes",
-      orderLink: "#",
+      orderLink: "https://egazette.nic.in/",
     },
     {
       title: "Transport Allowance",
       amount: "₹3,600",
-      explanationEn: "Transport Allowance covers commuting expenses.",
-      explanationHi: "ट्रांसपोर्ट अलाउंस आने-जाने के खर्चों के लिए दिया जाता है।",
-      appliesTo: "Most government employees",
-      calculation: "Fixed amount by pay level",
+      explanationEn: "Transport Allowance covers daily commuting expenses.",
+      explanationHi: "ट्रांसपोर्ट अलाउंस रोज़ाना आने-जाने के खर्च के लिए दिया जाता है।",
+      appliesTo: "Most Government Employees",
+      calculation: "Fixed amount based on Pay Level",
       currentRate: "₹1,800 – ₹7,200 + DA",
       lastRevised: "7th Pay Commission",
       arrears: "Yes",
-      orderLink: "#",
+      orderLink: "https://egazette.nic.in/",
     },
   ];
 
@@ -60,24 +61,24 @@ export default function HomePage() {
       title: "NPS Contribution",
       amount: "₹4,024",
       explanationEn:
-        "The National Pension System (NPS) is a mandatory retirement savings scheme for Central Government employees joining service on or after 1 January 2004.",
+        "National Pension System (NPS) is a mandatory retirement savings scheme for government employees appointed on or after 1 January 2004.",
       explanationHi:
-        "नेशनल पेंशन सिस्टम (NPS) एक अनिवार्य रिटायरमेंट पेंशन योजना है जो 1 जनवरी 2004 के बाद नियुक्त कर्मचारियों पर लागू होती है।",
-      appliesTo: "Central Government Employees (Joined on or after 01-01-2004)",
+        "नेशनल पेंशन सिस्टम (NPS) 1 जनवरी 2004 के बाद नियुक्त सरकारी कर्मचारियों के लिए अनिवार्य पेंशन योजना है।",
+      appliesTo: "Central Government Employees (joined on or after 01-01-2004)",
       calculation:
         "Employee contributes 10% of (Basic Pay + DA). Government contributes 14% of (Basic Pay + DA).",
       lastRevised:
-        "Government contribution increased from 10% to 14% w.e.f. 01 April 2019",
+        "Government contribution increased to 14% w.e.f. 01 April 2019",
       arrears: "No (prospective)",
-      orderLink: "#",
+      orderLink: "https://egazette.nic.in/",
     },
     {
       title: "Professional Tax",
       amount: "₹200",
-      explanationEn: "Professional tax is deducted by state law.",
-      explanationHi: "प्रोफेशनल टैक्स राज्य सरकार द्वारा लिया जाता है।",
+      explanationEn: "Professional tax is levied by state governments.",
+      explanationHi: "प्रोफेशनल टैक्स राज्य सरकार द्वारा लगाया जाता है।",
       appliesTo: "State-specific",
-      calculation: "Fixed slab by state",
+      calculation: "Fixed slab as per state law",
       lastRevised: "State Government Notification",
       arrears: "No",
       orderLink: null,
@@ -87,50 +88,6 @@ export default function HomePage() {
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
-
-      {/* BASIC PAY & DA */}
-      <h2>Basic Salary Components</h2>
-      {salaryBasics.map((item, index) => (
-        <div
-          key={index}
-          style={{
-            border: "1px solid #ddd",
-            padding: "15px",
-            marginBottom: "20px",
-            borderRadius: "6px",
-          }}
-        >
-          <h3>
-            {item.title} – {item.amount}
-          </h3>
-
-          <p>{item.explanationEn}</p>
-          <p>{item.explanationHi}</p>
-
-          <p>
-            <b>Applies To:</b> {item.appliesTo}
-          </p>
-          <p>
-            <b>Calculation:</b> {item.calculation}
-          </p>
-
-          {item.currentRate && (
-            <p>
-              <b>Current Rate:</b> {item.currentRate}
-            </p>
-          )}
-
-          <p>
-            <b>Last Revised:</b> {item.lastRevised}
-          </p>
-
-          {item.arrears && (
-            <p>
-              <b>Arrears Applicable:</b> {item.arrears}
-            </p>
-          )}
-        </div>
-      ))}
 
       {/* EARNINGS */}
       <h2>Earnings</h2>
@@ -151,29 +108,24 @@ export default function HomePage() {
           <p>{item.explanationEn}</p>
           <p>{item.explanationHi}</p>
 
-          <p>
-            <b>Applies To:</b> {item.appliesTo}
-          </p>
-          <p>
-            <b>Calculation:</b> {item.calculation}
-          </p>
-          <p>
-            <b>Current Rate:</b> {item.currentRate}
-          </p>
-          <p>
-            <b>Last Revised:</b> {item.lastRevised}
-          </p>
-          <p>
-            <b>Arrears Applicable:</b> {item.arrears}
-          </p>
+          <p><b>Applies To:</b> {item.appliesTo}</p>
+          <p><b>Calculation:</b> {item.calculation}</p>
 
-          {isPremiumUser ? (
-            <a href={item.orderLink} target="_blank">
-              View Government Order
-            </a>
-          ) : (
-            <span style={{ color: "gray" }}>🔒 Premium Only</span>
+          {item.currentRate && (
+            <p><b>Current Rate:</b> {item.currentRate}</p>
           )}
+
+          <p><b>Last Revised:</b> {item.lastRevised}</p>
+          <p><b>Arrears Applicable:</b> {item.arrears}</p>
+
+          {item.orderLink &&
+            (isPremiumUser ? (
+              <a href={item.orderLink} target="_blank">
+                View Government Order
+              </a>
+            ) : (
+              <span style={{ color: "gray" }}>🔒 Premium Only</span>
+            ))}
         </div>
       ))}
 
@@ -196,28 +148,19 @@ export default function HomePage() {
           <p>{item.explanationEn}</p>
           <p>{item.explanationHi}</p>
 
-          <p>
-            <b>Applies To:</b> {item.appliesTo}
-          </p>
-          <p>
-            <b>Calculation:</b> {item.calculation}
-          </p>
-          <p>
-            <b>Last Revised:</b> {item.lastRevised}
-          </p>
-          <p>
-            <b>Arrears:</b> {item.arrears}
-          </p>
+          <p><b>Applies To:</b> {item.appliesTo}</p>
+          <p><b>Calculation:</b> {item.calculation}</p>
+          <p><b>Last Revised:</b> {item.lastRevised}</p>
+          <p><b>Arrears:</b> {item.arrears}</p>
 
-          {item.orderLink ? (
-            isPremiumUser ? (
+          {item.orderLink &&
+            (isPremiumUser ? (
               <a href={item.orderLink} target="_blank">
                 View Government Order
               </a>
             ) : (
               <span style={{ color: "gray" }}>🔒 Premium Only</span>
-            )
-          ) : null}
+            ))}
         </div>
       ))}
     </main>
