@@ -181,7 +181,6 @@ export default function Home() {
 <p><b>Calculation:</b> {item.calculation}</p>
 <p><b>Last Revised:</b> {item.lastRevised}</p>
 <p><b>Arrears:</b> {item.arrearsApplicable}</p>
-        </div>
       ))}
       </div>
   );
