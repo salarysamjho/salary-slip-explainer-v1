@@ -6,35 +6,37 @@ export default function HomePage() {
       title: "Basic Pay",
       amount: "₹35,400",
       explanationEn:
-        "Basic Pay is the core component of salary. All allowances and most deductions are calculated on the basis of Basic Pay.",
+        "Basic Pay is the core component of salary. All allowances and most deductions are calculated based on it.",
       explanationHi:
-        "बेसिक पे वेतन का मुख्य हिस्सा होता है। सभी भत्ते और अधिकतर कटौतियाँ इसी के आधार पर तय होती हैं।",
+        "बेसिक पे वेतन का मुख्य हिस्सा होता है, जिसके आधार पर सभी भत्ते और अधिकतर कटौतियाँ तय होती हैं।",
       appliesTo: "All Government Employees",
       calculation: "Fixed as per Pay Level under 7th Pay Commission",
       currentRate: "Pay Level based (7th CPC Pay Matrix)",
       lastRevised: "7th Pay Commission (2016)",
       arrears: "Yes, if revision is delayed",
-      orderLink: null, // no GO link for basic pay
+      orderLink: null,
     },
     {
       title: "Dearness Allowance (DA)",
       amount: "₹17,346",
       explanationEn:
-        "Dearness Allowance is paid to reduce the impact of inflation. It is revised twice every year based on CPI data.",
+        "Dearness Allowance is paid to offset the impact of inflation and is revised twice every year.",
       explanationHi:
-        "महंगाई भत्ता महंगाई के प्रभाव को कम करने के लिए दिया जाता है। इसे साल में दो बार संशोधित किया जाता है।",
+        "महंगाई भत्ता महंगाई के प्रभाव को कम करने के लिए दिया जाता है और साल में दो बार संशोधित किया जाता है।",
       appliesTo: "All Government Employees",
       calculation: "Percentage of Basic Pay",
       currentRate: "49% of Basic Pay",
       lastRevised: "Revised by Government (Jan / July)",
       arrears: "Yes, paid from effective date",
-      orderLink: "https://egazette.nic.in/", // premium locked
+      orderLink: "https://egazette.nic.in/",
     },
     {
       title: "House Rent Allowance (HRA)",
       amount: "₹7,890",
-      explanationEn: "HRA helps employees meet house rent expenses.",
-      explanationHi: "एचआरए कर्मचारियों को घर का किराया चुकाने में मदद करता है।",
+      explanationEn:
+        "HRA helps employees meet house rent expenses.",
+      explanationHi:
+        "एचआरए कर्मचारियों को घर का किराया चुकाने में मदद करता है।",
       appliesTo: "Employees not using government accommodation",
       calculation: "Percentage of Basic Pay (+ DA in some cases)",
       currentRate: "8% / 16% / 24% depending on city category",
@@ -45,8 +47,10 @@ export default function HomePage() {
     {
       title: "Transport Allowance",
       amount: "₹3,600",
-      explanationEn: "Transport Allowance covers daily commuting expenses.",
-      explanationHi: "ट्रांसपोर्ट अलाउंस रोज़ाना आने-जाने के खर्च के लिए दिया जाता है।",
+      explanationEn:
+        "Transport Allowance covers daily commuting expenses.",
+      explanationHi:
+        "ट्रांसपोर्ट अलाउंस रोज़ाना आने-जाने के खर्च के लिए दिया जाता है।",
       appliesTo: "Most Government Employees",
       calculation: "Fixed amount based on Pay Level",
       currentRate: "₹1,800 – ₹7,200 + DA",
@@ -75,8 +79,10 @@ export default function HomePage() {
     {
       title: "Professional Tax",
       amount: "₹200",
-      explanationEn: "Professional tax is levied by state governments.",
-      explanationHi: "प्रोफेशनल टैक्स राज्य सरकार द्वारा लगाया जाता है।",
+      explanationEn:
+        "Professional tax is levied by state governments.",
+      explanationHi:
+        "प्रोफेशनल टैक्स राज्य सरकार द्वारा लगाया जाता है।",
       appliesTo: "State-specific",
       calculation: "Fixed slab as per state law",
       lastRevised: "State Government Notification",
@@ -85,9 +91,53 @@ export default function HomePage() {
     },
   ];
 
+  // --- Step 11: Salary Calculations ---
+  const parseAmount = (value: string) =>
+    Number(value.replace(/[₹,]/g, ""));
+
+  const grossSalary = earnings.reduce(
+    (sum, item) => sum + parseAmount(item.amount),
+    0
+  );
+
+  const totalDeductions = deductions.reduce(
+    (sum, item) => sum + parseAmount(item.amount),
+    0
+  );
+
+  const netSalary = grossSalary - totalDeductions;
+
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
+
+      {/* SALARY SUMMARY */}
+      <div
+        style={{
+          border: "2px solid #000",
+          padding: "15px",
+          marginBottom: "25px",
+          borderRadius: "6px",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <h2>Salary Summary</h2>
+
+        <p><b>Gross Salary:</b> ₹{grossSalary.toLocaleString()}</p>
+        <p><b>Total Deductions:</b> ₹{totalDeductions.toLocaleString()}</p>
+        <p style={{ fontSize: "18px" }}>
+          <b>Net (Take-Home) Salary:</b> ₹{netSalary.toLocaleString()}
+        </p>
+
+        <p>
+          <b>English:</b> Net salary is the amount you actually receive after
+          all deductions are subtracted from your gross salary.
+        </p>
+        <p>
+          <b>हिंदी:</b> नेट सैलरी वह राशि होती है जो सभी कटौतियाँ हटाने के बाद
+          आपको वास्तव में मिलती है।
+        </p>
+      </div>
 
       {/* EARNINGS */}
       <h2>Earnings</h2>
@@ -101,9 +151,7 @@ export default function HomePage() {
             borderRadius: "6px",
           }}
         >
-          <h3>
-            {item.title} – {item.amount}
-          </h3>
+          <h3>{item.title} – {item.amount}</h3>
 
           <p>{item.explanationEn}</p>
           <p>{item.explanationHi}</p>
@@ -141,9 +189,7 @@ export default function HomePage() {
             borderRadius: "6px",
           }}
         >
-          <h3>
-            {item.title} – {item.amount}
-          </h3>
+          <h3>{item.title} – {item.amount}</h3>
 
           <p>{item.explanationEn}</p>
           <p>{item.explanationHi}</p>
