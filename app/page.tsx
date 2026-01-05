@@ -135,7 +135,8 @@ export default function Home() {
       padding: "15px",
       marginBottom: "15px",
       borderRadius: "6px",
-    }}
+    </div>
+))}
   >
     <h3>
       {item.title} – ₹{item.amount}
@@ -170,7 +171,8 @@ export default function Home() {
       padding: "15px",
       marginBottom: "15px",
       borderRadius: "6px"
-    }}
+     </div>
+))}
   >
           <h3>
             {item.title} – ₹{item.amount}
