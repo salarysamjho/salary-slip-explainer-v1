@@ -183,6 +183,5 @@ export default function Home() {
 <p><b>Arrears:</b> {item.arrearsApplicable}</p>
         </div>
       ))}
-    </div>
   );
 
