@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 export default function HomePage() {
-  // ===== PREMIUM FLAG (FRONTEND ONLY) =====
+  // ===== PREMIUM FLAG =====
   const isPremiumUser = false;
 
   const [viewMode, setViewMode] = useState<"monthly" | "annual">("monthly");
@@ -58,81 +58,40 @@ export default function HomePage() {
 
   const netSalary = grossSalary - totalDeductions;
 
-  // ===== PDF HANDLER =====
-  const handleDownloadPDF = () => {
-    window.print();
-  };
+  // ===== STEP 19: DA / HRA TIMELINE =====
+  const daTimeline = [
+    {
+      period: "01 Jan 2023",
+      oldRate: "38%",
+      newRate: "42%",
+      arrears: "Paid from Jan 2023",
+    },
+    {
+      period: "01 Jul 2023",
+      oldRate: "42%",
+      newRate: "46%",
+      arrears: "Paid from Jul 2023",
+    },
+    {
+      period: "01 Jan 2024",
+      oldRate: "46%",
+      newRate: "49%",
+      arrears: "Paid from Jan 2024",
+    },
+  ];
+
+  const hraTimeline = [
+    {
+      period: "7th CPC Implementation",
+      oldRate: "24 / 16 / 8",
+      newRate: "30 / 20 / 10",
+      note: "Revised based on DA threshold",
+    },
+  ];
 
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
-
-      {/* 🔒 PDF DOWNLOAD CTA */}
-      <div
-        style={{
-          border: "2px solid #ccc",
-          padding: "12px",
-          marginBottom: "20px",
-          borderRadius: "6px",
-          backgroundColor: "#f9f9f9",
-        }}
-      >
-        <b>📄 Download Salary Explanation (PDF)</b>
-
-        {isPremiumUser ? (
-          <button
-            onClick={handleDownloadPDF}
-            style={{
-              marginTop: "10px",
-              padding: "8px 14px",
-              background: "#000",
-              color: "#fff",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            Download PDF
-          </button>
-        ) : (
-          <p style={{ color: "gray" }}>
-            🔒 Premium users only  
-            <br />
-            हिंदी: PDF डाउनलोड केवल प्रीमियम उपयोगकर्ताओं के लिए उपलब्ध है।
-          </p>
-        )}
-      </div>
-
-      {/* TOGGLES */}
-      <div style={{ marginBottom: "10px" }}>
-        <button onClick={() => setViewMode("monthly")}>Monthly</button>
-        <button
-          onClick={() => setViewMode("annual")}
-          style={{ marginLeft: "10px" }}
-        >
-          Annual
-        </button>
-      </div>
-
-      {/* CITY & STATE */}
-      <div style={{ marginBottom: "10px" }}>
-        <label>City: </label>
-        <select value={cityType} onChange={(e) => setCityType(e.target.value as any)}>
-          <option value="X">X City</option>
-          <option value="Y">Y City</option>
-          <option value="Z">Z City</option>
-        </select>
-      </div>
-
-      <div style={{ marginBottom: "20px" }}>
-        <label>State: </label>
-        <select value={state} onChange={(e) => setState(e.target.value)}>
-          <option>Maharashtra</option>
-          <option>Karnataka</option>
-          <option>Tamil Nadu</option>
-          <option>West Bengal</option>
-          <option>Delhi</option>
-        </select>
-      </div>
 
       {/* SUMMARY */}
       <div style={{ border: "2px solid #000", padding: "15px", marginBottom: "25px" }}>
@@ -145,23 +104,58 @@ export default function HomePage() {
       {/* EARNINGS */}
       <h2>Earnings</h2>
       {earnings.map((e, i) => (
-        <p key={i}>
-          {e.title}: ₹{e.amount.toLocaleString()}
-        </p>
+        <p key={i}>{e.title}: ₹{e.amount.toLocaleString()}</p>
       ))}
 
       {/* DEDUCTIONS */}
       <h2>Deductions</h2>
       {deductions.map((d, i) => (
-        <p key={i}>
-          {d.title}: ₹{d.amount.toLocaleString()}
-        </p>
+        <p key={i}>{d.title}: ₹{d.amount.toLocaleString()}</p>
       ))}
 
-      {/* PRINT NOTE */}
-      <p style={{ fontSize: "12px", marginTop: "30px", color: "#555" }}>
-        Note: Use browser print → “Save as PDF” for downloading.
-      </p>
+      {/* STEP 19: DA TIMELINE */}
+      <h2>DA Revision Timeline</h2>
+
+      {!isPremiumUser ? (
+        <p style={{ color: "gray" }}>
+          🔒 Premium users can view full DA revision history and arrears details.  
+          <br />
+          हिंदी: डीए संशोधन इतिहास देखने के लिए प्रीमियम आवश्यक है।
+        </p>
+      ) : (
+        daTimeline.map((d, i) => (
+          <div key={i} style={{ border: "1px solid #ddd", padding: "10px", marginBottom: "10px" }}>
+            <b>Effective From:</b> {d.period}  
+            <br />
+            Old Rate: {d.oldRate} → New Rate: {d.newRate}  
+            <br />
+            <b>Arrears:</b> {d.arrears}
+          </div>
+        ))
+      )}
+
+      {/* STEP 19: HRA TIMELINE */}
+      <h2>HRA Revision Timeline</h2>
+
+      {!isPremiumUser ? (
+        <p style={{ color: "gray" }}>
+          🔒 Premium users can view HRA revision details.  
+          <br />
+          हिंदी: एचआरए संशोधन विवरण देखने के लिए प्रीमियम आवश्यक है।
+        </p>
+      ) : (
+        hraTimeline.map((h, i) => (
+          <div key={i} style={{ border: "1px solid #ddd", padding: "10px" }}>
+            <b>{h.period}</b>  
+            <br />
+            Old Rate: {h.oldRate}  
+            <br />
+            New Rate: {h.newRate}  
+            <br />
+            <i>{h.note}</i>
+          </div>
+        ))
+      )}
     </main>
   );
 }
