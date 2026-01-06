@@ -1,15 +1,28 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 export default function HomePage() {
-  // ===== PREMIUM FLAG (SINGLE SOURCE OF TRUTH) =====
-  const isPremiumUser = false; // later controlled by login/payment
+  // ===== PREMIUM STATE (NOW DYNAMIC) =====
+  const [isPremiumUser, setIsPremiumUser] = useState(false);
 
   const [viewMode, setViewMode] = useState<"monthly" | "annual">("monthly");
   const [cityType, setCityType] = useState<"X" | "Y" | "Z">("X");
   const [state, setState] = useState<string>("Maharashtra");
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  // ===== LOAD RAZORPAY SCRIPT =====
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
 
   // ===== CORE VALUES =====
   const basicPay = 35400;
@@ -30,41 +43,10 @@ export default function HomePage() {
 
   // ===== EARNINGS =====
   const earnings = [
-    {
-      title: "Basic Pay",
-      amount: basicPay,
-      explanationEn:
-        "Basic Pay is the core component of salary. All allowances and most deductions are calculated based on it.",
-      explanationHi:
-        "बेसिक पे वेतन का मुख्य हिस्सा होता है, जिसके आधार पर सभी भत्ते और अधिकतर कटौतियाँ तय होती हैं।",
-      orderLink: null,
-    },
-    {
-      title: "Dearness Allowance (DA)",
-      amount: daAmount,
-      explanationEn:
-        "Dearness Allowance offsets inflation and is revised twice every year.",
-      explanationHi:
-        "महंगाई भत्ता महंगाई के प्रभाव को कम करने के लिए दिया जाता है।",
-      orderLink: "https://egazette.nic.in/",
-    },
-    {
-      title: "House Rent Allowance (HRA)",
-      amount: hraAmount,
-      explanationEn:
-        "HRA depends on city category (X / Y / Z).",
-      explanationHi:
-        "एचआरए शहर की श्रेणी (X / Y / Z) पर निर्भर करता है।",
-      orderLink:
-        "https://doe.gov.in/files/cenetral-pay_document/HRA_Eng_1.pdf",
-    },
-    {
-      title: "Transport Allowance",
-      amount: 3600,
-      explanationEn: "Covers daily commuting expenses.",
-      explanationHi: "आवागमन खर्च के लिए दिया जाता है।",
-      orderLink: "https://egazette.nic.in/",
-    },
+    { title: "Basic Pay", amount: basicPay },
+    { title: "Dearness Allowance (DA)", amount: daAmount },
+    { title: "House Rent Allowance (HRA)", amount: hraAmount },
+    { title: "Transport Allowance", amount: 3600 },
   ];
 
   // ===== DEDUCTIONS =====
@@ -72,20 +54,10 @@ export default function HomePage() {
     {
       title: "NPS Contribution",
       amount: Math.round((basicPay + daAmount) * 0.10),
-      explanationEn:
-        "Mandatory retirement contribution under NPS.",
-      explanationHi:
-        "एनपीएस के तहत अनिवार्य पेंशन योगदान।",
-      orderLink: "https://egazette.nic.in/",
     },
     {
       title: "Professional Tax",
       amount: professionalTax,
-      explanationEn:
-        "Professional Tax varies by state.",
-      explanationHi:
-        "प्रोफेशनल टैक्स राज्य के अनुसार बदलता है।",
-      orderLink: null,
     },
   ];
 
@@ -100,18 +72,41 @@ export default function HomePage() {
 
   const netSalary = grossSalary - totalDeductions;
 
-  // ===== FILE UPLOAD HANDLER =====
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setUploadedFile(e.target.files[0]);
+  // ===== RAZORPAY HANDLER =====
+  const handleUpgrade = () => {
+    if (!window.Razorpay) {
+      alert("Razorpay not loaded yet");
+      return;
     }
+
+    const options = {
+      key: "rzp_test_1DP5mmOlF5G5ag", // Razorpay TEST key
+      amount: 9900, // ₹99 in paise
+      currency: "INR",
+      name: "Salary Slip Explainer",
+      description: "Premium Access (Test Mode)",
+      handler: function () {
+        alert("Payment successful (Test Mode)");
+        setIsPremiumUser(true);
+      },
+      prefill: {
+        name: "Test User",
+        email: "test@example.com",
+      },
+      theme: {
+        color: "#000000",
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
   };
 
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
 
-      {/* 🔒 PREMIUM BANNER */}
+      {/* 🔒 PREMIUM CTA */}
       {!isPremiumUser && (
         <div
           style={{
@@ -122,36 +117,28 @@ export default function HomePage() {
             borderRadius: "6px",
           }}
         >
-          <b>🔒 Premium Feature</b>
+          <b>🔒 Premium Access</b>
           <p>
-            English: Unlock Government Orders, PDF downloads and revision
-            history with Premium.
+            English: Unlock Government Orders, PDFs and advanced explanations.
           </p>
           <p>
-            हिंदी: प्रीमियम के साथ सरकारी आदेश, PDF डाउनलोड और संशोधन
-            इतिहास अनलॉक करें।
+            हिंदी: प्रीमियम लेकर सरकारी आदेश, PDF और एडवांस जानकारी अनलॉक करें।
           </p>
+
+          <button
+            onClick={handleUpgrade}
+            style={{
+              padding: "8px 14px",
+              background: "#000",
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            Upgrade to Premium (₹99)
+          </button>
         </div>
       )}
-
-      {/* STEP 15: UPLOAD */}
-      <div
-        style={{
-          border: "2px dashed #666",
-          padding: "15px",
-          marginBottom: "20px",
-          borderRadius: "6px",
-        }}
-      >
-        <h2>Upload Your Salary Slip</h2>
-        <input type="file" accept=".pdf,image/*" onChange={handleFileUpload} />
-
-        {uploadedFile && (
-          <p>
-            ✅ <b>{uploadedFile.name}</b> uploaded successfully.
-          </p>
-        )}
-      </div>
 
       {/* TOGGLES */}
       <div style={{ marginBottom: "10px" }}>
@@ -196,36 +183,21 @@ export default function HomePage() {
       {/* EARNINGS */}
       <h2>Earnings</h2>
       {earnings.map((e, i) => (
-        <div key={i} style={{ marginBottom: "10px" }}>
-          <b>{e.title}:</b> ₹{e.amount.toLocaleString()}
-          <p>{e.explanationEn}</p>
-          <p>{e.explanationHi}</p>
-
-          {e.orderLink &&
-            (isPremiumUser ? (
-              <a href={e.orderLink} target="_blank">View Government Order</a>
-            ) : (
-              <span style={{ color: "gray" }}>🔒 Premium</span>
-            ))}
-        </div>
+        <p key={i}>{e.title}: ₹{e.amount.toLocaleString()}</p>
       ))}
 
       {/* DEDUCTIONS */}
       <h2>Deductions</h2>
       {deductions.map((d, i) => (
-        <div key={i} style={{ marginBottom: "10px" }}>
-          <b>{d.title}:</b> ₹{d.amount.toLocaleString()}
-          <p>{d.explanationEn}</p>
-          <p>{d.explanationHi}</p>
-
-          {d.orderLink &&
-            (isPremiumUser ? (
-              <a href={d.orderLink} target="_blank">View Government Order</a>
-            ) : (
-              <span style={{ color: "gray" }}>🔒 Premium</span>
-            ))}
-        </div>
+        <p key={i}>{d.title}: ₹{d.amount.toLocaleString()}</p>
       ))}
+
+      {/* PREMIUM CONFIRMATION */}
+      {isPremiumUser && (
+        <div style={{ marginTop: "30px", color: "green" }}>
+          ✅ Premium Activated. Government Orders are now unlocked.
+        </div>
+      )}
     </main>
   );
 }
