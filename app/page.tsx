@@ -1,12 +1,20 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+type SavedSalary = {
+  date: string;
+  annualIncome: number;
+  oldTax: number;
+  newTax: number;
+  betterRegime: string;
+};
 
 export default function HomePage() {
   // ===== PREMIUM FLAG =====
   const isPremiumUser = false;
 
-  const [viewMode, setViewMode] = useState<"monthly" | "annual">("annual");
+  const [savedData, setSavedData] = useState<SavedSalary[]>([]);
 
   // ===== CORE VALUES =====
   const basicPay = 35400;
@@ -20,11 +28,11 @@ export default function HomePage() {
     { title: "Transport Allowance", amount: 3600 },
   ];
 
-  // ===== CALCULATIONS =====
+  // ===== ANNUAL INCOME =====
   const annualIncome =
     earnings.reduce((sum, e) => sum + e.amount, 0) * 12;
 
-  // ===== STEP 21: OLD REGIME TAX =====
+  // ===== TAX CALCULATION =====
   const standardDeduction = 50000;
   const deduction80C = 150000;
   const deduction80CCD = 50000;
@@ -50,12 +58,8 @@ export default function HomePage() {
     return Math.round(tax);
   };
 
-  const oldTax = calculateOldTax(oldRegimeTaxableIncome);
-
-  // ===== STEP 21: NEW REGIME TAX =====
   const calculateNewTax = (income: number) => {
     let tax = 0;
-
     if (income > 1500000) {
       tax += (income - 1500000) * 0.30;
       income = 1500000;
@@ -75,66 +79,99 @@ export default function HomePage() {
     if (income > 300000) {
       tax += (income - 300000) * 0.05;
     }
-
     return Math.round(tax);
   };
 
+  const oldTax = calculateOldTax(oldRegimeTaxableIncome);
   const newTax = calculateNewTax(annualIncome);
+  const betterRegime = oldTax < newTax ? "Old Regime" : "New Regime";
 
-  const betterRegime =
-    oldTax < newTax ? "Old Regime" : "New Regime";
+  // ===== LOAD SAVED DATA =====
+  useEffect(() => {
+    const data = localStorage.getItem("savedSalaryData");
+    if (data) {
+      setSavedData(JSON.parse(data));
+    }
+  }, []);
+
+  // ===== SAVE HANDLER =====
+  const handleSave = () => {
+    const newEntry: SavedSalary = {
+      date: new Date().toLocaleString(),
+      annualIncome,
+      oldTax,
+      newTax,
+      betterRegime,
+    };
+
+    const updated = [newEntry, ...savedData];
+    setSavedData(updated);
+    localStorage.setItem("savedSalaryData", JSON.stringify(updated));
+  };
 
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
 
       {/* SUMMARY */}
-      <div style={{ border: "2px solid #000", padding: "15px", marginBottom: "25px" }}>
-        <h2>Annual Salary Summary</h2>
+      <div style={{ border: "2px solid #000", padding: "15px", marginBottom: "20px" }}>
+        <h2>Annual Summary</h2>
         <p><b>Annual Income:</b> ₹{annualIncome.toLocaleString()}</p>
+        <p><b>Old Regime Tax:</b> ₹{oldTax.toLocaleString()}</p>
+        <p><b>New Regime Tax:</b> ₹{newTax.toLocaleString()}</p>
+        <p><b>Better Option:</b> {betterRegime}</p>
       </div>
 
-      {/* STEP 21: TAX COMPARISON */}
-      <h2>Income Tax Comparison</h2>
-
-      {!isPremiumUser ? (
-        <p style={{ color: "gray" }}>
-          🔒 Premium users can view detailed tax comparison.  
-          <br />
-          हिंदी: टैक्स तुलना देखने के लिए प्रीमियम आवश्यक है।
-        </p>
+      {/* SAVE BUTTON */}
+      {isPremiumUser ? (
+        <button
+          onClick={handleSave}
+          style={{
+            padding: "10px 15px",
+            background: "#000",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: "20px",
+          }}
+        >
+          💾 Save This Salary
+        </button>
       ) : (
-        <>
-          <div style={{ border: "1px solid #ddd", padding: "12px", marginBottom: "12px" }}>
-            <b>Old Regime</b>
-            <p>Taxable Income: ₹{oldRegimeTaxableIncome.toLocaleString()}</p>
-            <p>Estimated Tax: ₹{oldTax.toLocaleString()}</p>
-          </div>
-
-          <div style={{ border: "1px solid #ddd", padding: "12px", marginBottom: "12px" }}>
-            <b>New Regime</b>
-            <p>Taxable Income: ₹{annualIncome.toLocaleString()}</p>
-            <p>Estimated Tax: ₹{newTax.toLocaleString()}</p>
-          </div>
-
-          <div style={{ border: "2px solid green", padding: "12px" }}>
-            <b>Better Option:</b> {betterRegime}
-            <p>
-              English: Based on your income and deductions, the{" "}
-              <b>{betterRegime}</b> results in lower tax.
-            </p>
-            <p>
-              हिंदी: आपकी आय और कटौतियों के आधार पर{" "}
-              <b>{betterRegime}</b> टैक्स के लिए बेहतर है।
-            </p>
-          </div>
-        </>
+        <p style={{ color: "gray" }}>
+          🔒 Save salary feature is available for Premium users only.  
+          <br />
+          हिंदी: सैलरी सेव करने की सुविधा केवल प्रीमियम उपयोगकर्ताओं के लिए है।
+        </p>
       )}
 
-      <p style={{ fontSize: "12px", marginTop: "25px", color: "#555" }}>
-        Note: This is an approximate calculation. Health & education cess
-        and special cases are not included.
-      </p>
+      {/* SAVED HISTORY */}
+      <h2>Saved Salary History</h2>
+
+      {savedData.length === 0 ? (
+        <p>No saved records yet.</p>
+      ) : (
+        savedData.map((item, i) => (
+          <div
+            key={i}
+            style={{
+              border: "1px solid #ddd",
+              padding: "10px",
+              marginBottom: "10px",
+            }}
+          >
+            <b>Date:</b> {item.date}
+            <br />
+            Annual Income: ₹{item.annualIncome.toLocaleString()}
+            <br />
+            Old Tax: ₹{item.oldTax.toLocaleString()}
+            <br />
+            New Tax: ₹{item.newTax.toLocaleString()}
+            <br />
+            Better: <b>{item.betterRegime}</b>
+          </div>
+        ))
+      )}
     </main>
   );
 }
