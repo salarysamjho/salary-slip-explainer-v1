@@ -3,30 +3,29 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [basicPay, setBasicPay] = useState(27100);
+  const [basicPay, setBasicPay] = useState<number | "">("");
   const [city, setCity] = useState("X");
   const [npsApplicable, setNpsApplicable] = useState(true);
-  const [cgeisAmount, setCgeisAmount] = useState(0);
+  const [cgeisAmount, setCgeisAmount] = useState<number | "">("");
 
-  const [otherEarnings, setOtherEarnings] = useState([
-    { name: "", amount: 0 },
-  ]);
-  const [otherDeductions, setOtherDeductions] = useState([
-    { name: "", amount: 0 },
-  ]);
+  const [otherEarnings, setOtherEarnings] = useState([{ name: "", amount: "" }]);
+  const [otherDeductions, setOtherDeductions] = useState([{ name: "", amount: "" }]);
 
   const [result, setResult] = useState<any>(null);
   const [isCalculated, setIsCalculated] = useState(false);
 
-  // -------- CALCULATE SALARY ----------
   const calculateSalary = () => {
-    const DA_RATE = 0.58;
-    const HRA_RATE = city === "X" ? 0.3 : city === "Y" ? 0.2 : 0.1;
-    const TRANSPORT = 3600;
+    if (!basicPay) return alert("Please enter Basic Pay");
 
-    const basic = basicPay;
+    const DA_RATE = 0.58;
+    const TRANSPORT = 3600;
+    const HRA_RATE = city === "X" ? 0.3 : city === "Y" ? 0.2 : 0.1;
+
+    const basic = Number(basicPay);
     const da = Math.round(basic * DA_RATE);
     const hra = Math.round(basic * HRA_RATE);
+
+    const daOnTA = Math.round(TRANSPORT * DA_RATE);
 
     const nps = npsApplicable ? Math.round((basic + da) * 0.1) : 0;
 
@@ -41,7 +40,7 @@ export default function Home() {
     );
 
     const gross =
-      basic + da + hra + TRANSPORT + extraEarnings;
+      basic + da + hra + TRANSPORT + daOnTA + extraEarnings;
 
     const totalDeductions =
       nps + Number(cgeisAmount || 0) + extraDeductions;
@@ -53,6 +52,7 @@ export default function Home() {
       da,
       hra,
       transport: TRANSPORT,
+      daOnTA,
       nps,
       cgeisAmount,
       extraEarnings,
@@ -65,28 +65,27 @@ export default function Home() {
     setIsCalculated(true);
   };
 
-  // -------- RESET ----------
   const resetAll = () => {
+    setBasicPay("");
+    setCgeisAmount("");
+    setOtherEarnings([{ name: "", amount: "" }]);
+    setOtherDeductions([{ name: "", amount: "" }]);
     setResult(null);
     setIsCalculated(false);
-    setOtherEarnings([{ name: "", amount: 0 }]);
-    setOtherDeductions([{ name: "", amount: 0 }]);
-    setCgeisAmount(0);
   };
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h1>Salary Slip Explainer</h1>
 
-      {/* INPUT SECTION */}
       <div style={{ background: "#f5f5f5", padding: "15px", borderRadius: "6px" }}>
         <label>
-          Basic Pay (₹):{" "}
+          Basic Pay (₹):
           <input
             type="number"
             value={basicPay}
             disabled={isCalculated}
-            onChange={(e) => setBasicPay(Number(e.target.value))}
+            onChange={(e) => setBasicPay(e.target.value === "" ? "" : Number(e.target.value))}
           />
         </label>
 
@@ -94,11 +93,7 @@ export default function Home() {
 
         <label>
           City:
-          <select
-            value={city}
-            disabled={isCalculated}
-            onChange={(e) => setCity(e.target.value)}
-          >
+          <select value={city} disabled={isCalculated} onChange={(e) => setCity(e.target.value)}>
             <option value="X">X City</option>
             <option value="Y">Y City</option>
             <option value="Z">Z City</option>
@@ -125,82 +120,71 @@ export default function Home() {
             type="number"
             value={cgeisAmount}
             disabled={isCalculated}
-            onChange={(e) => setCgeisAmount(Number(e.target.value))}
+            onChange={(e) => setCgeisAmount(e.target.value === "" ? "" : Number(e.target.value))}
           />
         </label>
       </div>
 
-      {/* OTHER EARNINGS */}
       <h3>Other Earnings (Optional)</h3>
       {otherEarnings.map((e, i) => (
         <div key={i}>
-          <input
-            placeholder="Name"
-            disabled={isCalculated}
-            onChange={(ev) => (e.name = ev.target.value)}
-          />
+          <input placeholder="Name" disabled={isCalculated} />
           <input
             type="number"
             placeholder="Amount"
             disabled={isCalculated}
-            onChange={(ev) => (e.amount = Number(ev.target.value))}
+            onChange={(ev) => (e.amount = ev.target.value)}
           />
         </div>
       ))}
 
       {!isCalculated && (
-        <button onClick={() => setOtherEarnings([...otherEarnings, { name: "", amount: 0 }])}>
+        <button onClick={() => setOtherEarnings([...otherEarnings, { name: "", amount: "" }])}>
           + Add Earning
         </button>
       )}
 
-      {/* OTHER DEDUCTIONS */}
       <h3>Other Deductions (Optional)</h3>
       {otherDeductions.map((d, i) => (
         <div key={i}>
-          <input
-            placeholder="Name"
-            disabled={isCalculated}
-            onChange={(ev) => (d.name = ev.target.value)}
-          />
+          <input placeholder="Name" disabled={isCalculated} />
           <input
             type="number"
             placeholder="Amount"
             disabled={isCalculated}
-            onChange={(ev) => (d.amount = Number(ev.target.value))}
+            onChange={(ev) => (d.amount = ev.target.value)}
           />
         </div>
       ))}
 
       {!isCalculated && (
-        <button onClick={() => setOtherDeductions([...otherDeductions, { name: "", amount: 0 }])}>
+        <button onClick={() => setOtherDeductions([...otherDeductions, { name: "", amount: "" }])}>
           + Add Deduction
         </button>
       )}
 
       <br /><br />
 
-      {/* ACTION BUTTONS */}
       {!isCalculated ? (
         <button onClick={calculateSalary}>Calculate Salary</button>
       ) : (
         <button onClick={resetAll}>Reset</button>
       )}
 
-      {/* RESULT */}
       {result && (
         <>
           <h2>Net Salary: ₹{result.netSalary.toLocaleString()}</h2>
 
-          <h3>Detailed Breakdown</h3>
+          <h3>Detailed Bifurcation</h3>
           <ul>
             <li>Basic Pay: ₹{result.basic}</li>
-            <li>Dearness Allowance (58%): ₹{result.da}</li>
+            <li>DA (58%): ₹{result.da}</li>
             <li>HRA: ₹{result.hra}</li>
             <li>Transport Allowance: ₹{result.transport}</li>
+            <li>DA on Transport Allowance: ₹{result.daOnTA}</li>
             <li>Other Earnings: ₹{result.extraEarnings}</li>
             <li>NPS Deduction: ₹{result.nps}</li>
-            <li>CGEIS: ₹{result.cgeisAmount}</li>
+            <li>CGEIS: ₹{result.cgeisAmount || 0}</li>
             <li>Other Deductions: ₹{result.extraDeductions}</li>
           </ul>
         </>
