@@ -3,185 +3,167 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [basicPay, setBasicPay] = useState<number | "">(27100);
+  const DA_RATE = 0.58;
+  const TA_AMOUNT = 3600;
+  const DA_ON_TA_RATE = 0.58;
+
+  const HRA_RATES: Record<string, number> = {
+    X: 0.3,
+    Y: 0.2,
+    Z: 0.1,
+  };
+
+  const [basicPay, setBasicPay] = useState<number | "">("");
   const [city, setCity] = useState("X");
   const [npsApplicable, setNpsApplicable] = useState(true);
   const [cgeis, setCgeis] = useState<number | "">("");
-  const [locked, setLocked] = useState(false);
+  const [calculated, setCalculated] = useState(false);
 
-  const [otherEarnings, setOtherEarnings] = useState<
-    { name: string; amount: number | "" }[]
-  >([]);
+  const resetAll = () => {
+    setBasicPay("");
+    setCity("X");
+    setNpsApplicable(true);
+    setCgeis("");
+    setCalculated(false);
+  };
 
-  const [otherDeductions, setOtherDeductions] = useState<
-    { name: string; amount: number | "" }[]
-  >([]);
+  if (!calculated) {
+    return (
+      <div style={{ padding: 24, maxWidth: 900, margin: "auto" }}>
+        <h1>Salary Slip Explainer</h1>
 
-  const DA_RATE = 0.58;
-  const TA = 3600;
-  const DA_ON_TA_RATE = 0.58;
-
-  const hraRate = city === "X" ? 0.3 : city === "Y" ? 0.2 : 0.1;
-
-  const da = typeof basicPay === "number" ? basicPay * DA_RATE : 0;
-  const hra = typeof basicPay === "number" ? basicPay * hraRate : 0;
-  const daOnTA = TA * DA_ON_TA_RATE;
-
-  const nps = npsApplicable
-    ? ((typeof basicPay === "number" ? basicPay : 0) + da) * 0.1
-    : 0;
-
-  const totalOtherEarnings = otherEarnings.reduce(
-    (sum, e) => sum + (typeof e.amount === "number" ? e.amount : 0),
-    0
-  );
-
-  const totalOtherDeductions = otherDeductions.reduce(
-    (sum, d) => sum + (typeof d.amount === "number" ? d.amount : 0),
-    0
-  );
-
-  const gross =
-    (typeof basicPay === "number" ? basicPay : 0) +
-    da +
-    hra +
-    TA +
-    daOnTA +
-    totalOtherEarnings;
-
-  const totalDeductions =
-    nps +
-    (typeof cgeis === "number" ? cgeis : 0) +
-    totalOtherDeductions;
-
-  const netSalary = gross - totalDeductions;
-
-  const explanationForCustom = (name: string) => ({
-    en: `${name} is an additional component added by the employee as per salary slip.`,
-    hi: `${name} कर्मचारी द्वारा वेतन पर्ची के अनुसार जोड़ा गया अतिरिक्त घटक है।`,
-  });
-
-  return (
-    <div style={{ padding: 20, fontFamily: "Arial", maxWidth: 900, margin: "auto" }}>
-      <h1>Salary Slip Explainer</h1>
-
-      {/* INPUT SECTION */}
-      <div style={{ border: "1px solid #ddd", padding: 15, borderRadius: 8 }}>
         <label>Basic Pay (₹): </label>
         <input
-          disabled={locked}
+          type="number"
           value={basicPay}
-          onChange={(e) =>
-            setBasicPay(e.target.value === "" ? "" : Number(e.target.value))
-          }
+          onChange={(e) => setBasicPay(Number(e.target.value))}
         />
-
         <br /><br />
 
         <label>City: </label>
-        <select disabled={locked} value={city} onChange={(e) => setCity(e.target.value)}>
+        <select value={city} onChange={(e) => setCity(e.target.value)}>
           <option value="X">X City</option>
           <option value="Y">Y City</option>
           <option value="Z">Z City</option>
         </select>
-
         <br /><br />
 
         <label>
           <input
             type="checkbox"
-            disabled={locked}
             checked={npsApplicable}
-            onChange={() => setNpsApplicable(!npsApplicable)}
+            onChange={(e) => setNpsApplicable(e.target.checked)}
           />{" "}
           NPS Applicable
         </label>
-
         <br /><br />
 
         <label>CGEIS Amount (₹): </label>
         <input
-          disabled={locked}
+          type="number"
           value={cgeis}
-          onChange={(e) =>
-            setCgeis(e.target.value === "" ? "" : Number(e.target.value))
-          }
+          onChange={(e) => setCgeis(Number(e.target.value))}
         />
-
         <br /><br />
 
-        <button onClick={() => setLocked(true)}>Calculate Salary</button>
-        <button
-          style={{ marginLeft: 10 }}
-          onClick={() => window.location.reload()}
-        >
-          Reset
-        </button>
+        <button onClick={() => setCalculated(true)}>Calculate Salary</button>
       </div>
+    );
+  }
 
-      {/* RESULT */}
-      {locked && (
-        <>
-          <h2 style={{ marginTop: 30 }}>Net Salary: ₹{netSalary.toFixed(2)}</h2>
+  const bp = Number(basicPay);
+  const da = bp * DA_RATE;
+  const hra = bp * HRA_RATES[city];
+  const daOnTA = TA_AMOUNT * DA_ON_TA_RATE;
+  const nps = npsApplicable ? (bp + da) * 0.1 : 0;
+  const cgeisAmt = Number(cgeis) || 0;
 
-          {/* EARNINGS */}
-          <div style={{ background: "#f9fff9", padding: 15, borderRadius: 8 }}>
-            <h3>Earnings</h3>
+  const earnings = [
+    {
+      title: "Basic Pay",
+      amount: bp,
+      en: "Fixed component of salary on which all allowances are calculated.",
+      hi: "वेतन का मुख्य भाग जिस पर सभी भत्ते आधारित होते हैं।",
+    },
+    {
+      title: "Dearness Allowance (58%)",
+      amount: da,
+      en: "Paid to offset inflation, revised periodically by the Government.",
+      hi: "महंगाई के प्रभाव को कम करने हेतु दिया जाता है।",
+    },
+    {
+      title: "House Rent Allowance (HRA)",
+      amount: hra,
+      en: `Calculated as ${HRA_RATES[city] * 100}% of Basic Pay based on city category.`,
+      hi: "शहर श्रेणी के अनुसार मूल वेतन का प्रतिशत।",
+    },
+    {
+      title: "Transport Allowance",
+      amount: TA_AMOUNT,
+      en: "Fixed allowance for commuting expenses.",
+      hi: "आवागमन के लिए निश्चित भत्ता।",
+    },
+    {
+      title: "DA on Transport Allowance",
+      amount: daOnTA,
+      en: "DA is also applicable on Transport Allowance.",
+      hi: "परिवहन भत्ते पर भी डीए लागू होता है।",
+    },
+  ];
 
-            <p><b>Basic Pay:</b> ₹{basicPay}</p>
-            <p>English: Fixed component on which allowances are calculated.</p>
-            <p>हिंदी: वेतन का मुख्य भाग जिस पर भत्ते आधारित होते हैं।</p>
+  const deductions = [
+    ...(npsApplicable
+      ? [
+          {
+            title: "NPS Contribution",
+            amount: nps,
+            en: "10% of (Basic Pay + DA) deducted for retirement savings.",
+            hi: "सेवानिवृत्ति के लिए मूल वेतन और डीए का 10% योगदान।",
+          },
+        ]
+      : []),
+    ...(cgeisAmt > 0
+      ? [
+          {
+            title: "CGEIS",
+            amount: cgeisAmt,
+            en: "Group insurance contribution for government employees.",
+            hi: "सरकारी कर्मचारियों के लिए समूह बीमा योगदान।",
+          },
+        ]
+      : []),
+  ];
 
-            <p><b>Dearness Allowance (58%):</b> ₹{da.toFixed(0)}</p>
-            <p>English: Paid to offset inflation.</p>
-            <p>हिंदी: महंगाई के प्रभाव को कम करने हेतु।</p>
+  const totalEarnings = earnings.reduce((a, b) => a + b.amount, 0);
+  const totalDeductions = deductions.reduce((a, b) => a + b.amount, 0);
+  const netSalary = totalEarnings - totalDeductions;
 
-            <p><b>HRA:</b> ₹{hra.toFixed(0)}</p>
-            <p>English: Based on city category.</p>
-            <p>हिंदी: शहर श्रेणी पर आधारित।</p>
+  return (
+    <div style={{ padding: 24, maxWidth: 900, margin: "auto" }}>
+      <h1>Salary Slip Explainer</h1>
 
-            <p><b>Transport Allowance:</b> ₹{TA}</p>
-            <p><b>DA on Transport Allowance:</b> ₹{daOnTA.toFixed(0)}</p>
+      <h2>Net Salary: ₹{netSalary.toFixed(2)}</h2>
 
-            {otherEarnings.map((e, i) => (
-              <div key={i}>
-                <p><b>{e.name}:</b> ₹{e.amount}</p>
-                <p>{explanationForCustom(e.name).en}</p>
-                <p>{explanationForCustom(e.name).hi}</p>
-              </div>
-            ))}
-          </div>
+      <h3>Earnings</h3>
+      {earnings.map((e, i) => (
+        <div key={i} style={{ border: "1px solid #ddd", padding: 12, marginBottom: 10 }}>
+          <strong>{e.title}: ₹{e.amount.toFixed(2)}</strong>
+          <p>English: {e.en}</p>
+          <p>हिंदी: {e.hi}</p>
+        </div>
+      ))}
 
-          {/* DEDUCTIONS */}
-          <div style={{ background: "#fff6f6", padding: 15, borderRadius: 8, marginTop: 20 }}>
-            <h3>Deductions</h3>
+      <h3>Deductions</h3>
+      {deductions.length === 0 && <p>No deductions applicable.</p>}
+      {deductions.map((d, i) => (
+        <div key={i} style={{ border: "1px solid #ddd", padding: 12, marginBottom: 10 }}>
+          <strong>{d.title}: ₹{d.amount.toFixed(2)}</strong>
+          <p>English: {d.en}</p>
+          <p>हिंदी: {d.hi}</p>
+        </div>
+      ))}
 
-            {npsApplicable && (
-              <>
-                <p><b>NPS:</b> ₹{nps.toFixed(0)}</p>
-                <p>English: 10% of Basic + DA.</p>
-                <p>हिंदी: बेसिक व डीए का 10%।</p>
-              </>
-            )}
-
-            {typeof cgeis === "number" && (
-              <>
-                <p><b>CGEIS:</b> ₹{cgeis}</p>
-                <p>English: Group insurance contribution.</p>
-                <p>हिंदी: समूह बीमा योगदान।</p>
-              </>
-            )}
-
-            {otherDeductions.map((d, i) => (
-              <div key={i}>
-                <p><b>{d.name}:</b> ₹{d.amount}</p>
-                <p>{explanationForCustom(d.name).en}</p>
-                <p>{explanationForCustom(d.name).hi}</p>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      <button onClick={resetAll}>Reset</button>
     </div>
   );
 }
