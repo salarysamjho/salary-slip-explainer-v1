@@ -3,13 +3,12 @@
 import { useState } from "react";
 
 export default function HomePage() {
-  const isPremiumUser = false;
+  // ===== PREMIUM FLAG (SINGLE SOURCE OF TRUTH) =====
+  const isPremiumUser = false; // later controlled by login/payment
 
   const [viewMode, setViewMode] = useState<"monthly" | "annual">("monthly");
   const [cityType, setCityType] = useState<"X" | "Y" | "Z">("X");
   const [state, setState] = useState<string>("Maharashtra");
-
-  // Step 15: Salary slip upload state
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
 
   // ===== CORE VALUES =====
@@ -31,10 +30,41 @@ export default function HomePage() {
 
   // ===== EARNINGS =====
   const earnings = [
-    { title: "Basic Pay", amount: basicPay },
-    { title: "Dearness Allowance (DA)", amount: daAmount },
-    { title: "House Rent Allowance (HRA)", amount: hraAmount },
-    { title: "Transport Allowance", amount: 3600 },
+    {
+      title: "Basic Pay",
+      amount: basicPay,
+      explanationEn:
+        "Basic Pay is the core component of salary. All allowances and most deductions are calculated based on it.",
+      explanationHi:
+        "बेसिक पे वेतन का मुख्य हिस्सा होता है, जिसके आधार पर सभी भत्ते और अधिकतर कटौतियाँ तय होती हैं।",
+      orderLink: null,
+    },
+    {
+      title: "Dearness Allowance (DA)",
+      amount: daAmount,
+      explanationEn:
+        "Dearness Allowance offsets inflation and is revised twice every year.",
+      explanationHi:
+        "महंगाई भत्ता महंगाई के प्रभाव को कम करने के लिए दिया जाता है।",
+      orderLink: "https://egazette.nic.in/",
+    },
+    {
+      title: "House Rent Allowance (HRA)",
+      amount: hraAmount,
+      explanationEn:
+        "HRA depends on city category (X / Y / Z).",
+      explanationHi:
+        "एचआरए शहर की श्रेणी (X / Y / Z) पर निर्भर करता है।",
+      orderLink:
+        "https://doe.gov.in/files/cenetral-pay_document/HRA_Eng_1.pdf",
+    },
+    {
+      title: "Transport Allowance",
+      amount: 3600,
+      explanationEn: "Covers daily commuting expenses.",
+      explanationHi: "आवागमन खर्च के लिए दिया जाता है।",
+      orderLink: "https://egazette.nic.in/",
+    },
   ];
 
   // ===== DEDUCTIONS =====
@@ -42,10 +72,20 @@ export default function HomePage() {
     {
       title: "NPS Contribution",
       amount: Math.round((basicPay + daAmount) * 0.10),
+      explanationEn:
+        "Mandatory retirement contribution under NPS.",
+      explanationHi:
+        "एनपीएस के तहत अनिवार्य पेंशन योगदान।",
+      orderLink: "https://egazette.nic.in/",
     },
     {
       title: "Professional Tax",
       amount: professionalTax,
+      explanationEn:
+        "Professional Tax varies by state.",
+      explanationHi:
+        "प्रोफेशनल टैक्स राज्य के अनुसार बदलता है।",
+      orderLink: null,
     },
   ];
 
@@ -60,7 +100,7 @@ export default function HomePage() {
 
   const netSalary = grossSalary - totalDeductions;
 
-  // ===== FILE HANDLER =====
+  // ===== FILE UPLOAD HANDLER =====
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setUploadedFile(e.target.files[0]);
@@ -70,6 +110,29 @@ export default function HomePage() {
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
+
+      {/* 🔒 PREMIUM BANNER */}
+      {!isPremiumUser && (
+        <div
+          style={{
+            border: "2px solid #f39c12",
+            padding: "12px",
+            marginBottom: "20px",
+            backgroundColor: "#fff8e1",
+            borderRadius: "6px",
+          }}
+        >
+          <b>🔒 Premium Feature</b>
+          <p>
+            English: Unlock Government Orders, PDF downloads and revision
+            history with Premium.
+          </p>
+          <p>
+            हिंदी: प्रीमियम के साथ सरकारी आदेश, PDF डाउनलोड और संशोधन
+            इतिहास अनलॉक करें।
+          </p>
+        </div>
+      )}
 
       {/* STEP 15: UPLOAD */}
       <div
@@ -81,31 +144,22 @@ export default function HomePage() {
         }}
       >
         <h2>Upload Your Salary Slip</h2>
-        <input
-          type="file"
-          accept=".pdf,image/*"
-          onChange={handleFileUpload}
-        />
+        <input type="file" accept=".pdf,image/*" onChange={handleFileUpload} />
 
         {uploadedFile && (
-          <p style={{ marginTop: "10px" }}>
-            ✅ <b>{uploadedFile.name}</b> uploaded successfully.  
-            <br />
-            We will explain your salary components below.
+          <p>
+            ✅ <b>{uploadedFile.name}</b> uploaded successfully.
           </p>
         )}
-
-        <p style={{ fontSize: "13px", color: "#555" }}>
-          English: For accuracy, salary slip details are explained manually in this version.  
-          <br />
-          हिंदी: सही जानकारी के लिए इस संस्करण में वेतन पर्ची की व्याख्या मैन्युअल रूप से की जाती है।
-        </p>
       </div>
 
       {/* TOGGLES */}
       <div style={{ marginBottom: "10px" }}>
         <button onClick={() => setViewMode("monthly")}>Monthly</button>
-        <button onClick={() => setViewMode("annual")} style={{ marginLeft: "10px" }}>
+        <button
+          onClick={() => setViewMode("annual")}
+          style={{ marginLeft: "10px" }}
+        >
           Annual
         </button>
       </div>
@@ -142,13 +196,35 @@ export default function HomePage() {
       {/* EARNINGS */}
       <h2>Earnings</h2>
       {earnings.map((e, i) => (
-        <p key={i}>{e.title}: ₹{e.amount.toLocaleString()}</p>
+        <div key={i} style={{ marginBottom: "10px" }}>
+          <b>{e.title}:</b> ₹{e.amount.toLocaleString()}
+          <p>{e.explanationEn}</p>
+          <p>{e.explanationHi}</p>
+
+          {e.orderLink &&
+            (isPremiumUser ? (
+              <a href={e.orderLink} target="_blank">View Government Order</a>
+            ) : (
+              <span style={{ color: "gray" }}>🔒 Premium</span>
+            ))}
+        </div>
       ))}
 
       {/* DEDUCTIONS */}
       <h2>Deductions</h2>
       {deductions.map((d, i) => (
-        <p key={i}>{d.title}: ₹{d.amount.toLocaleString()}</p>
+        <div key={i} style={{ marginBottom: "10px" }}>
+          <b>{d.title}:</b> ₹{d.amount.toLocaleString()}
+          <p>{d.explanationEn}</p>
+          <p>{d.explanationHi}</p>
+
+          {d.orderLink &&
+            (isPremiumUser ? (
+              <a href={d.orderLink} target="_blank">View Government Order</a>
+            ) : (
+              <span style={{ color: "gray" }}>🔒 Premium</span>
+            ))}
+        </div>
       ))}
     </main>
   );
