@@ -1,217 +1,187 @@
 'use client';
 
-import { useEffect, useState } from "react";
-
-type SavedSalary = {
-  date: string;
-  annualIncome: number;
-  oldTax: number;
-  newTax: number;
-  betterRegime: string;
-};
+import { useState } from "react";
 
 export default function HomePage() {
-  const isPremiumUser = false; // toggle for testing
+  /* ===============================
+     PHASE 1: USER INPUT STATE
+  =============================== */
+  const [basicPay, setBasicPay] = useState<number | null>(null);
+  const [cityType, setCityType] = useState<"X" | "Y" | "Z">("X");
+  const [transportBase, setTransportBase] = useState<number>(0);
+  const [npsEnabled, setNpsEnabled] = useState<boolean>(true);
+  const [calculated, setCalculated] = useState<boolean>(false);
 
-  const [savedData, setSavedData] = useState<SavedSalary[]>([]);
+  /* ===============================
+     GOVERNMENT RULES (LOCKED)
+  =============================== */
+  const DA_RATE = 0.58; // 58%
+  const HRA_RATE = {
+    X: 0.30,
+    Y: 0.20,
+    Z: 0.10,
+  };
 
-  // ===== CORE VALUES =====
-  const basicPay = 35400;
-  const daRate = 0.49;
-  const daAmount = Math.round(basicPay * daRate);
+  /* ===============================
+     DERIVED CALCULATIONS
+  =============================== */
+  const daAmount = basicPay ? Math.round(basicPay * DA_RATE) : 0;
+  const hraAmount = basicPay
+    ? Math.round(basicPay * HRA_RATE[cityType])
+    : 0;
 
-  const earnings = [
-    { title: "Basic Pay", amount: basicPay },
-    { title: "Dearness Allowance (DA)", amount: daAmount },
-    { title: "House Rent Allowance (HRA)", amount: 10620 },
-    { title: "Transport Allowance", amount: 3600 },
-  ];
+  // Transport Allowance base by city
+  const baseTA =
+    cityType === "X" ? 3600 : 1800;
 
-  const annualIncome =
-    earnings.reduce((sum, e) => sum + e.amount, 0) * 12;
+  const taWithDA = Math.round(baseTA + baseTA * DA_RATE);
 
-  // ===== TAX =====
-  const oldTax = 85000;
-  const newTax = 103000;
-  const betterRegime = oldTax < newTax ? "Old Regime" : "New Regime";
+  const npsAmount =
+    basicPay && npsEnabled
+      ? Math.round((basicPay + daAmount) * 0.10)
+      : 0;
 
-  // ===== STORAGE =====
-  useEffect(() => {
-    const data = localStorage.getItem("savedSalaryData");
-    if (data) setSavedData(JSON.parse(data));
-  }, []);
+  const totalEarnings =
+    (basicPay ?? 0) + daAmount + hraAmount + taWithDA;
 
-  const saveSalary = () => {
-    const entry: SavedSalary = {
-      date: new Date().toLocaleString(),
-      annualIncome,
-      oldTax,
-      newTax,
-      betterRegime,
-    };
-    const updated = [entry, ...savedData];
-    setSavedData(updated);
-    localStorage.setItem("savedSalaryData", JSON.stringify(updated));
+  const totalDeductions = npsAmount;
+
+  const netSalary = totalEarnings - totalDeductions;
+
+  /* ===============================
+     HANDLER
+  =============================== */
+  const handleCalculate = () => {
+    if (!basicPay || basicPay <= 0) {
+      alert("Please enter a valid Basic Pay.");
+      return;
+    }
+    setCalculated(true);
   };
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "#f4f6f8",
         padding: "20px",
         fontFamily: "system-ui, Arial",
+        background: "#f4f6f8",
       }}
     >
-      {/* HEADER */}
-      <header style={{ marginBottom: "20px" }}>
-        <h1 style={{ marginBottom: "5px" }}>Salary Slip Explainer</h1>
-        <p style={{ color: "#555" }}>
-          Understand your salary, deductions & tax — clearly.
-        </p>
-      </header>
+      <h1>Salary Slip Explainer</h1>
+      <p style={{ color: "#555" }}>
+        Enter your salary details to get a clear explanation of earnings and deductions.
+      </p>
 
-      {/* PREMIUM BANNER */}
-      {!isPremiumUser && (
-        <div
+      {/* ===============================
+         MANUAL ENTRY SECTION
+      =============================== */}
+      <section
+        style={{
+          background: "#fff",
+          padding: "20px",
+          borderRadius: "10px",
+          marginBottom: "20px",
+        }}
+      >
+        <h2>Manual Salary Entry</h2>
+
+        <label>Basic Pay (₹)</label>
+        <input
+          type="number"
+          placeholder="Enter Basic Pay"
+          value={basicPay ?? ""}
+          onChange={(e) => setBasicPay(Number(e.target.value))}
+          style={{ width: "100%", padding: "8px", marginBottom: "12px" }}
+        />
+
+        <label>City Category (for HRA)</label>
+        <select
+          value={cityType}
+          onChange={(e) => setCityType(e.target.value as any)}
+          style={{ width: "100%", padding: "8px", marginBottom: "12px" }}
+        >
+          <option value="X">X City (Metro)</option>
+          <option value="Y">Y City</option>
+          <option value="Z">Z City</option>
+        </select>
+
+        <label>
+          <input
+            type="checkbox"
+            checked={npsEnabled}
+            onChange={() => setNpsEnabled(!npsEnabled)}
+          />{" "}
+          NPS applicable (10% of Basic + DA)
+        </label>
+
+        <br /><br />
+
+        <button
+          onClick={handleCalculate}
           style={{
-            background: "#fff3cd",
-            border: "1px solid #ffeeba",
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "20px",
+            padding: "10px 16px",
+            background: "#000",
+            color: "#fff",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
           }}
         >
-          <b>🔒 Premium Features</b>
-          <p style={{ margin: "5px 0" }}>
-            Unlock PDF downloads, tax comparison & saved history.
-          </p>
-          <p style={{ fontSize: "14px", color: "#555" }}>
-            हिंदी: प्रीमियम में PDF, टैक्स तुलना और सेव की गई सैलरी उपलब्ध है।
-          </p>
-        </div>
-      )}
+          Calculate Salary
+        </button>
+      </section>
 
-      {/* SUMMARY CARD */}
+      {/* ===============================
+         UPLOAD (LOCKED – PHASE 2)
+      =============================== */}
       <section
         style={{
           background: "#fff",
+          padding: "15px",
           borderRadius: "10px",
-          padding: "20px",
           marginBottom: "20px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          opacity: 0.6,
         }}
       >
-        <h2>Annual Salary Summary</h2>
-        <p><b>Annual Income:</b> ₹{annualIncome.toLocaleString()}</p>
-        <p><b>Old Regime Tax:</b> ₹{oldTax.toLocaleString()}</p>
-        <p><b>New Regime Tax:</b> ₹{newTax.toLocaleString()}</p>
-        <p>
-          <b>Better Option:</b>{" "}
-          <span style={{ color: "green" }}>{betterRegime}</span>
+        <h3>Upload Salary Slip (PDF / Image)</h3>
+        <p>🔒 Coming Soon (Premium Feature)</p>
+        <p style={{ fontSize: "14px", color: "#555" }}>
+          Manual entry gives 100% accurate results at present.
         </p>
       </section>
 
-      {/* EARNINGS */}
-      <section
-        style={{
-          background: "#fff",
-          borderRadius: "10px",
-          padding: "20px",
-          marginBottom: "20px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h2>Earnings</h2>
-        {earnings.map((e, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              padding: "8px 0",
-              borderBottom: "1px solid #eee",
-            }}
-          >
-            <span>{e.title}</span>
-            <b>₹{e.amount.toLocaleString()}</b>
-          </div>
-        ))}
-      </section>
+      {/* ===============================
+         RESULT SECTION
+      =============================== */}
+      {calculated && (
+        <section
+          style={{
+            background: "#fff",
+            padding: "20px",
+            borderRadius: "10px",
+          }}
+        >
+          <h2>Salary Breakdown</h2>
 
-      {/* SAVE BUTTON */}
-      <section
-        style={{
-          background: "#fff",
-          borderRadius: "10px",
-          padding: "20px",
-          marginBottom: "20px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h2>Save Salary</h2>
-
-        {isPremiumUser ? (
-          <button
-            onClick={saveSalary}
-            style={{
-              padding: "10px 16px",
-              background: "#000",
-              color: "#fff",
-              borderRadius: "6px",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            💾 Save This Salary
-          </button>
-        ) : (
-          <p style={{ color: "#777" }}>
-            🔒 Saving salary is a Premium feature.
+          <h3>Earnings</h3>
+          <p>Basic Pay: ₹{basicPay?.toLocaleString()}</p>
+          <p>Dearness Allowance (58%): ₹{daAmount.toLocaleString()}</p>
+          <p>House Rent Allowance: ₹{hraAmount.toLocaleString()}</p>
+          <p>
+            Transport Allowance (with DA): ₹{taWithDA.toLocaleString()}
           </p>
-        )}
-      </section>
 
-      {/* SAVED HISTORY */}
-      <section
-        style={{
-          background: "#fff",
-          borderRadius: "10px",
-          padding: "20px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-        }}
-      >
-        <h2>Saved Salary History</h2>
+          <h3>Deductions</h3>
+          <p>NPS Contribution: ₹{npsAmount.toLocaleString()}</p>
 
-        {savedData.length === 0 ? (
-          <p style={{ color: "#777" }}>No saved records yet.</p>
-        ) : (
-          savedData.map((s, i) => (
-            <div
-              key={i}
-              style={{
-                border: "1px solid #eee",
-                borderRadius: "6px",
-                padding: "10px",
-                marginBottom: "10px",
-              }}
-            >
-              <b>Date:</b> {s.date}
-              <br />
-              Income: ₹{s.annualIncome.toLocaleString()}
-              <br />
-              Better: <b>{s.betterRegime}</b>
-            </div>
-          ))
-        )}
-      </section>
+          <hr />
 
-      {/* FOOTER */}
-      <footer style={{ marginTop: "30px", textAlign: "center", color: "#777" }}>
-        <small>
-          This is an informational tool. Tax values are approximate.
-        </small>
-      </footer>
+          <p><b>Total Earnings:</b> ₹{totalEarnings.toLocaleString()}</p>
+          <p><b>Total Deductions:</b> ₹{totalDeductions.toLocaleString()}</p>
+          <p><b>Net Salary:</b> ₹{netSalary.toLocaleString()}</p>
+        </section>
+      )}
     </main>
   );
 }
