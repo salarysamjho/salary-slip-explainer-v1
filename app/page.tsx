@@ -1,222 +1,210 @@
-'use client';
+"use client";
 
 import { useState } from "react";
 
-/* ===============================
-   SMART EXPLANATION ENGINE
-=============================== */
-function getExplanation(name: string, type: "earning" | "deduction") {
-  const key = name.toLowerCase();
+export default function Home() {
+  const [basicPay, setBasicPay] = useState(27100);
+  const [city, setCity] = useState("X");
+  const [npsApplicable, setNpsApplicable] = useState(true);
+  const [cgeisAmount, setCgeisAmount] = useState(0);
 
-  if (key.includes("professional")) {
-    return {
-      en: "Professional Tax is a state-level tax deducted from salary as per state laws.",
-      hi: "प्रोफेशनल टैक्स राज्य सरकार द्वारा लगाया जाने वाला कर है जो वेतन से काटा जाता है।",
-    };
-  }
+  const [otherEarnings, setOtherEarnings] = useState([
+    { name: "", amount: 0 },
+  ]);
+  const [otherDeductions, setOtherDeductions] = useState([
+    { name: "", amount: 0 },
+  ]);
 
-  if (key.includes("special")) {
-    return {
-      en: "Special Allowance is an employer-specific allowance and is usually fully taxable.",
-      hi: "स्पेशल अलाउंस नियोक्ता द्वारा दिया जाने वाला भत्ता है और सामान्यतः पूरी तरह टैक्सेबल होता है।",
-    };
-  }
+  const [result, setResult] = useState<any>(null);
+  const [isCalculated, setIsCalculated] = useState(false);
 
-  if (key.includes("overtime")) {
-    return {
-      en: "Overtime allowance is paid for extra hours worked beyond regular duty hours.",
-      hi: "ओवरटाइम भत्ता अतिरिक्त कार्य समय के लिए दिया जाता है।",
-    };
-  }
+  // -------- CALCULATE SALARY ----------
+  const calculateSalary = () => {
+    const DA_RATE = 0.58;
+    const HRA_RATE = city === "X" ? 0.3 : city === "Y" ? 0.2 : 0.1;
+    const TRANSPORT = 3600;
 
-  if (key.includes("lic")) {
-    return {
-      en: "This deduction is usually an insurance premium paid towards LIC policies.",
-      hi: "यह कटौती सामान्यतः एलआईसी बीमा प्रीमियम के लिए होती है।",
-    };
-  }
+    const basic = basicPay;
+    const da = Math.round(basic * DA_RATE);
+    const hra = Math.round(basic * HRA_RATE);
 
-  if (key.includes("loan")) {
-    return {
-      en: "This deduction is towards repayment of a loan or advance taken by the employee.",
-      hi: "यह कटौती कर्मचारी द्वारा लिए गए ऋण या अग्रिम की वापसी के लिए होती है।",
-    };
-  }
+    const nps = npsApplicable ? Math.round((basic + da) * 0.1) : 0;
 
-  if (key.includes("gpf") || key.includes("cpf")) {
-    return {
-      en: "This is a provident fund contribution deducted for retirement benefits.",
-      hi: "यह भविष्य निधि में योगदान है जो सेवानिवृत्ति लाभ के लिए काटा जाता है।",
-    };
-  }
+    const extraEarnings = otherEarnings.reduce(
+      (sum, e) => sum + Number(e.amount || 0),
+      0
+    );
 
-  if (key.includes("union")) {
-    return {
-      en: "Union fee is a voluntary contribution towards employee union activities.",
-      hi: "यूनियन शुल्क कर्मचारी संघ की गतिविधियों के लिए स्वैच्छिक योगदान होता है।",
-    };
-  }
+    const extraDeductions = otherDeductions.reduce(
+      (sum, d) => sum + Number(d.amount || 0),
+      0
+    );
 
-  return {
-    en:
-      type === "earning"
-        ? "This is an additional earning entered by you from your salary slip."
-        : "This is an additional deduction entered by you from your salary slip.",
-    hi:
-      type === "earning"
-        ? "यह अतिरिक्त आय है जो आपने अपनी सैलरी स्लिप से जोड़ी है।"
-        : "यह अतिरिक्त कटौती है जो आपने अपनी सैलरी स्लिप से जोड़ी है।",
-  };
-}
+    const gross =
+      basic + da + hra + TRANSPORT + extraEarnings;
 
-export default function HomePage() {
-  /* ===============================
-     INPUT STATES
-  =============================== */
-  const [basicPay, setBasicPay] = useState<number | null>(null);
-  const [cityType, setCityType] = useState<"X" | "Y" | "Z">("X");
-  const [npsEnabled, setNpsEnabled] = useState(true);
+    const totalDeductions =
+      nps + Number(cgeisAmount || 0) + extraDeductions;
 
-  const [cgeisEnabled, setCgeisEnabled] = useState(false);
-  const [cgeisGroup, setCgeisGroup] = useState<"A" | "B" | "C" | "D">("C");
+    const netSalary = gross - totalDeductions;
 
-  const [otherEarnings, setOtherEarnings] = useState<{ name: string; amount: number }[]>([]);
-  const [otherDeductions, setOtherDeductions] = useState<{ name: string; amount: number }[]>([]);
+    setResult({
+      basic,
+      da,
+      hra,
+      transport: TRANSPORT,
+      nps,
+      cgeisAmount,
+      extraEarnings,
+      extraDeductions,
+      gross,
+      totalDeductions,
+      netSalary,
+    });
 
-  const [calculated, setCalculated] = useState(false);
-
-  /* ===============================
-     GOVERNMENT RULES
-  =============================== */
-  const DA_RATE = 0.58;
-  const HRA_RATE = { X: 0.30, Y: 0.20, Z: 0.10 };
-  const CGEIS_MAP = { A: 30, B: 15, C: 7.5, D: 4 };
-
-  /* ===============================
-     CALCULATIONS
-  =============================== */
-  const daAmount = basicPay ? Math.round(basicPay * DA_RATE) : 0;
-  const hraAmount = basicPay ? Math.round(basicPay * HRA_RATE[cityType]) : 0;
-
-  const baseTA = cityType === "X" ? 3600 : 1800;
-  const taWithDA = Math.round(baseTA + baseTA * DA_RATE);
-
-  const npsAmount =
-    basicPay && npsEnabled ? Math.round((basicPay + daAmount) * 0.1) : 0;
-
-  const cgeisAmount = cgeisEnabled ? CGEIS_MAP[cgeisGroup] : 0;
-
-  const otherEarningsTotal = otherEarnings.reduce((s, e) => s + e.amount, 0);
-  const otherDeductionsTotal = otherDeductions.reduce((s, d) => s + d.amount, 0);
-
-  const totalEarnings =
-    (basicPay ?? 0) +
-    daAmount +
-    hraAmount +
-    taWithDA +
-    otherEarningsTotal;
-
-  const totalDeductions =
-    npsAmount + cgeisAmount + otherDeductionsTotal;
-
-  const netSalary = totalEarnings - totalDeductions;
-
-  /* ===============================
-     HANDLERS
-  =============================== */
-  const handleCalculate = () => {
-    if (!basicPay || basicPay <= 0) {
-      alert("Please enter a valid Basic Pay.");
-      return;
-    }
-    setCalculated(true);
+    setIsCalculated(true);
   };
 
-  const addItem = (
-    setter: any,
-    list: any[]
-  ) => setter([...list, { name: "", amount: 0 }]);
-
-  const updateItem = (
-    setter: any,
-    list: any[],
-    index: number,
-    field: string,
-    value: any
-  ) => {
-    const updated = [...list];
-    updated[index][field] = field === "amount" ? Number(value) : value;
-    setter(updated);
+  // -------- RESET ----------
+  const resetAll = () => {
+    setResult(null);
+    setIsCalculated(false);
+    setOtherEarnings([{ name: "", amount: 0 }]);
+    setOtherDeductions([{ name: "", amount: 0 }]);
+    setCgeisAmount(0);
   };
 
   return (
-    <main style={{ padding: 20, fontFamily: "system-ui", background: "#f4f6f8" }}>
+    <div style={{ padding: "20px", fontFamily: "Arial" }}>
       <h1>Salary Slip Explainer</h1>
 
-      {/* BASIC INPUT */}
-      <section style={{ background: "#fff", padding: 20, borderRadius: 10 }}>
-        <label>Basic Pay (₹)</label>
-        <input type="number" value={basicPay ?? ""} onChange={e => setBasicPay(Number(e.target.value))} />
-
-        <label>City</label>
-        <select value={cityType} onChange={e => setCityType(e.target.value as any)}>
-          <option value="X">X City</option>
-          <option value="Y">Y City</option>
-          <option value="Z">Z City</option>
-        </select>
-
+      {/* INPUT SECTION */}
+      <div style={{ background: "#f5f5f5", padding: "15px", borderRadius: "6px" }}>
         <label>
-          <input type="checkbox" checked={npsEnabled} onChange={() => setNpsEnabled(!npsEnabled)} />
-          NPS applicable
+          Basic Pay (₹):{" "}
+          <input
+            type="number"
+            value={basicPay}
+            disabled={isCalculated}
+            onChange={(e) => setBasicPay(Number(e.target.value))}
+          />
         </label>
 
-        <label>
-          <input type="checkbox" checked={cgeisEnabled} onChange={() => setCgeisEnabled(!cgeisEnabled)} />
-          CGEIS applicable
-        </label>
+        <br /><br />
 
-        {cgeisEnabled && (
-          <select value={cgeisGroup} onChange={e => setCgeisGroup(e.target.value as any)}>
-            <option value="A">Group A</option>
-            <option value="B">Group B</option>
-            <option value="C">Group C</option>
-            <option value="D">Group D</option>
+        <label>
+          City:
+          <select
+            value={city}
+            disabled={isCalculated}
+            onChange={(e) => setCity(e.target.value)}
+          >
+            <option value="X">X City</option>
+            <option value="Y">Y City</option>
+            <option value="Z">Z City</option>
           </select>
-        )}
+        </label>
 
-        <button onClick={handleCalculate}>Calculate Salary</button>
-      </section>
+        <br /><br />
+
+        <label>
+          <input
+            type="checkbox"
+            checked={npsApplicable}
+            disabled={isCalculated}
+            onChange={() => setNpsApplicable(!npsApplicable)}
+          />{" "}
+          NPS Applicable
+        </label>
+
+        <br /><br />
+
+        <label>
+          CGEIS Amount (₹):
+          <input
+            type="number"
+            value={cgeisAmount}
+            disabled={isCalculated}
+            onChange={(e) => setCgeisAmount(Number(e.target.value))}
+          />
+        </label>
+      </div>
 
       {/* OTHER EARNINGS */}
-      <section>
-        <h3>Other Earnings (Optional)</h3>
-        {otherEarnings.map((e, i) => (
-          <div key={i}>
-            <input placeholder="Name" onChange={v => updateItem(setOtherEarnings, otherEarnings, i, "name", v.target.value)} />
-            <input type="number" placeholder="Amount" onChange={v => updateItem(setOtherEarnings, otherEarnings, i, "amount", v.target.value)} />
-          </div>
-        ))}
-        <button onClick={() => addItem(setOtherEarnings, otherEarnings)}>+ Add Earning</button>
-      </section>
+      <h3>Other Earnings (Optional)</h3>
+      {otherEarnings.map((e, i) => (
+        <div key={i}>
+          <input
+            placeholder="Name"
+            disabled={isCalculated}
+            onChange={(ev) => (e.name = ev.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Amount"
+            disabled={isCalculated}
+            onChange={(ev) => (e.amount = Number(ev.target.value))}
+          />
+        </div>
+      ))}
+
+      {!isCalculated && (
+        <button onClick={() => setOtherEarnings([...otherEarnings, { name: "", amount: 0 }])}>
+          + Add Earning
+        </button>
+      )}
 
       {/* OTHER DEDUCTIONS */}
-      <section>
-        <h3>Other Deductions (Optional)</h3>
-        {otherDeductions.map((d, i) => (
-          <div key={i}>
-            <input placeholder="Name" onChange={v => updateItem(setOtherDeductions, otherDeductions, i, "name", v.target.value)} />
-            <input type="number" placeholder="Amount" onChange={v => updateItem(setOtherDeductions, otherDeductions, i, "amount", v.target.value)} />
-          </div>
-        ))}
-        <button onClick={() => addItem(setOtherDeductions, otherDeductions)}>+ Add Deduction</button>
-      </section>
+      <h3>Other Deductions (Optional)</h3>
+      {otherDeductions.map((d, i) => (
+        <div key={i}>
+          <input
+            placeholder="Name"
+            disabled={isCalculated}
+            onChange={(ev) => (d.name = ev.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Amount"
+            disabled={isCalculated}
+            onChange={(ev) => (d.amount = Number(ev.target.value))}
+          />
+        </div>
+      ))}
+
+      {!isCalculated && (
+        <button onClick={() => setOtherDeductions([...otherDeductions, { name: "", amount: 0 }])}>
+          + Add Deduction
+        </button>
+      )}
+
+      <br /><br />
+
+      {/* ACTION BUTTONS */}
+      {!isCalculated ? (
+        <button onClick={calculateSalary}>Calculate Salary</button>
+      ) : (
+        <button onClick={resetAll}>Reset</button>
+      )}
 
       {/* RESULT */}
-      {calculated && (
-        <section style={{ background: "#fff", padding: 20, borderRadius: 10 }}>
-          <h2>Net Salary: ₹{netSalary.toLocaleString()}</h2>
-        </section>
+      {result && (
+        <>
+          <h2>Net Salary: ₹{result.netSalary.toLocaleString()}</h2>
+
+          <h3>Detailed Breakdown</h3>
+          <ul>
+            <li>Basic Pay: ₹{result.basic}</li>
+            <li>Dearness Allowance (58%): ₹{result.da}</li>
+            <li>HRA: ₹{result.hra}</li>
+            <li>Transport Allowance: ₹{result.transport}</li>
+            <li>Other Earnings: ₹{result.extraEarnings}</li>
+            <li>NPS Deduction: ₹{result.nps}</li>
+            <li>CGEIS: ₹{result.cgeisAmount}</li>
+            <li>Other Deductions: ₹{result.extraDeductions}</li>
+          </ul>
+        </>
       )}
-    </main>
+    </div>
   );
 }
