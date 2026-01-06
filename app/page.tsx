@@ -109,6 +109,20 @@ export default function HomePage() {
     localStorage.setItem("savedSalaryData", JSON.stringify(updated));
   };
 
+  // ===== DELETE SINGLE =====
+  const handleDeleteOne = (index: number) => {
+    const updated = savedData.filter((_, i) => i !== index);
+    setSavedData(updated);
+    localStorage.setItem("savedSalaryData", JSON.stringify(updated));
+  };
+
+  // ===== CLEAR ALL =====
+  const handleClearAll = () => {
+    if (!confirm("Are you sure you want to delete all saved records?")) return;
+    setSavedData([]);
+    localStorage.removeItem("savedSalaryData");
+  };
+
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
@@ -122,7 +136,7 @@ export default function HomePage() {
         <p><b>Better Option:</b> {betterRegime}</p>
       </div>
 
-      {/* SAVE BUTTON */}
+      {/* SAVE */}
       {isPremiumUser ? (
         <button
           onClick={handleSave}
@@ -139,38 +153,73 @@ export default function HomePage() {
         </button>
       ) : (
         <p style={{ color: "gray" }}>
-          🔒 Save salary feature is available for Premium users only.  
+          🔒 Saving salary history is a Premium feature.  
           <br />
-          हिंदी: सैलरी सेव करने की सुविधा केवल प्रीमियम उपयोगकर्ताओं के लिए है।
+          हिंदी: सैलरी सेव करना प्रीमियम सुविधा है।
         </p>
       )}
 
-      {/* SAVED HISTORY */}
+      {/* HISTORY */}
       <h2>Saved Salary History</h2>
 
       {savedData.length === 0 ? (
         <p>No saved records yet.</p>
       ) : (
-        savedData.map((item, i) => (
-          <div
-            key={i}
-            style={{
-              border: "1px solid #ddd",
-              padding: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <b>Date:</b> {item.date}
-            <br />
-            Annual Income: ₹{item.annualIncome.toLocaleString()}
-            <br />
-            Old Tax: ₹{item.oldTax.toLocaleString()}
-            <br />
-            New Tax: ₹{item.newTax.toLocaleString()}
-            <br />
-            Better: <b>{item.betterRegime}</b>
-          </div>
-        ))
+        <>
+          {isPremiumUser && (
+            <button
+              onClick={handleClearAll}
+              style={{
+                marginBottom: "15px",
+                background: "#b00020",
+                color: "#fff",
+                border: "none",
+                padding: "6px 12px",
+                cursor: "pointer",
+              }}
+            >
+              🧹 Clear All Records
+            </button>
+          )}
+
+          {savedData.map((item, i) => (
+            <div
+              key={i}
+              style={{
+                border: "1px solid #ddd",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
+            >
+              <b>Date:</b> {item.date}
+              <br />
+              Annual Income: ₹{item.annualIncome.toLocaleString()}
+              <br />
+              Old Tax: ₹{item.oldTax.toLocaleString()}
+              <br />
+              New Tax: ₹{item.newTax.toLocaleString()}
+              <br />
+              Better: <b>{item.betterRegime}</b>
+
+              {isPremiumUser && (
+                <div style={{ marginTop: "8px" }}>
+                  <button
+                    onClick={() => handleDeleteOne(i)}
+                    style={{
+                      background: "#666",
+                      color: "#fff",
+                      border: "none",
+                      padding: "4px 8px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ❌ Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          ))}
+        </>
       )}
     </main>
   );
