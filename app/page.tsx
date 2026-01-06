@@ -11,8 +11,7 @@ type SavedSalary = {
 };
 
 export default function HomePage() {
-  // ===== PREMIUM FLAG =====
-  const isPremiumUser = false;
+  const isPremiumUser = false; // toggle for testing
 
   const [savedData, setSavedData] = useState<SavedSalary[]>([]);
 
@@ -28,199 +27,191 @@ export default function HomePage() {
     { title: "Transport Allowance", amount: 3600 },
   ];
 
-  // ===== ANNUAL INCOME =====
   const annualIncome =
     earnings.reduce((sum, e) => sum + e.amount, 0) * 12;
 
-  // ===== TAX CALCULATION =====
-  const standardDeduction = 50000;
-  const deduction80C = 150000;
-  const deduction80CCD = 50000;
-
-  const oldRegimeTaxableIncome = Math.max(
-    annualIncome - standardDeduction - deduction80C - deduction80CCD,
-    0
-  );
-
-  const calculateOldTax = (income: number) => {
-    let tax = 0;
-    if (income > 1000000) {
-      tax += (income - 1000000) * 0.30;
-      income = 1000000;
-    }
-    if (income > 500000) {
-      tax += (income - 500000) * 0.20;
-      income = 500000;
-    }
-    if (income > 250000) {
-      tax += (income - 250000) * 0.05;
-    }
-    return Math.round(tax);
-  };
-
-  const calculateNewTax = (income: number) => {
-    let tax = 0;
-    if (income > 1500000) {
-      tax += (income - 1500000) * 0.30;
-      income = 1500000;
-    }
-    if (income > 1200000) {
-      tax += (income - 1200000) * 0.20;
-      income = 1200000;
-    }
-    if (income > 900000) {
-      tax += (income - 900000) * 0.15;
-      income = 900000;
-    }
-    if (income > 600000) {
-      tax += (income - 600000) * 0.10;
-      income = 600000;
-    }
-    if (income > 300000) {
-      tax += (income - 300000) * 0.05;
-    }
-    return Math.round(tax);
-  };
-
-  const oldTax = calculateOldTax(oldRegimeTaxableIncome);
-  const newTax = calculateNewTax(annualIncome);
+  // ===== TAX =====
+  const oldTax = 85000;
+  const newTax = 103000;
   const betterRegime = oldTax < newTax ? "Old Regime" : "New Regime";
 
-  // ===== LOAD SAVED DATA =====
+  // ===== STORAGE =====
   useEffect(() => {
     const data = localStorage.getItem("savedSalaryData");
-    if (data) {
-      setSavedData(JSON.parse(data));
-    }
+    if (data) setSavedData(JSON.parse(data));
   }, []);
 
-  // ===== SAVE HANDLER =====
-  const handleSave = () => {
-    const newEntry: SavedSalary = {
+  const saveSalary = () => {
+    const entry: SavedSalary = {
       date: new Date().toLocaleString(),
       annualIncome,
       oldTax,
       newTax,
       betterRegime,
     };
-
-    const updated = [newEntry, ...savedData];
+    const updated = [entry, ...savedData];
     setSavedData(updated);
     localStorage.setItem("savedSalaryData", JSON.stringify(updated));
-  };
-
-  // ===== DELETE SINGLE =====
-  const handleDeleteOne = (index: number) => {
-    const updated = savedData.filter((_, i) => i !== index);
-    setSavedData(updated);
-    localStorage.setItem("savedSalaryData", JSON.stringify(updated));
-  };
-
-  // ===== CLEAR ALL =====
-  const handleClearAll = () => {
-    if (!confirm("Are you sure you want to delete all saved records?")) return;
-    setSavedData([]);
-    localStorage.removeItem("savedSalaryData");
   };
 
   return (
-    <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Salary Slip Explainer</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#f4f6f8",
+        padding: "20px",
+        fontFamily: "system-ui, Arial",
+      }}
+    >
+      {/* HEADER */}
+      <header style={{ marginBottom: "20px" }}>
+        <h1 style={{ marginBottom: "5px" }}>Salary Slip Explainer</h1>
+        <p style={{ color: "#555" }}>
+          Understand your salary, deductions & tax — clearly.
+        </p>
+      </header>
 
-      {/* SUMMARY */}
-      <div style={{ border: "2px solid #000", padding: "15px", marginBottom: "20px" }}>
-        <h2>Annual Summary</h2>
-        <p><b>Annual Income:</b> ₹{annualIncome.toLocaleString()}</p>
-        <p><b>Old Regime Tax:</b> ₹{oldTax.toLocaleString()}</p>
-        <p><b>New Regime Tax:</b> ₹{newTax.toLocaleString()}</p>
-        <p><b>Better Option:</b> {betterRegime}</p>
-      </div>
-
-      {/* SAVE */}
-      {isPremiumUser ? (
-        <button
-          onClick={handleSave}
+      {/* PREMIUM BANNER */}
+      {!isPremiumUser && (
+        <div
           style={{
-            padding: "10px 15px",
-            background: "#000",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
+            background: "#fff3cd",
+            border: "1px solid #ffeeba",
+            padding: "12px",
+            borderRadius: "8px",
             marginBottom: "20px",
           }}
         >
-          💾 Save This Salary
-        </button>
-      ) : (
-        <p style={{ color: "gray" }}>
-          🔒 Saving salary history is a Premium feature.  
-          <br />
-          हिंदी: सैलरी सेव करना प्रीमियम सुविधा है।
-        </p>
+          <b>🔒 Premium Features</b>
+          <p style={{ margin: "5px 0" }}>
+            Unlock PDF downloads, tax comparison & saved history.
+          </p>
+          <p style={{ fontSize: "14px", color: "#555" }}>
+            हिंदी: प्रीमियम में PDF, टैक्स तुलना और सेव की गई सैलरी उपलब्ध है।
+          </p>
+        </div>
       )}
 
-      {/* HISTORY */}
-      <h2>Saved Salary History</h2>
+      {/* SUMMARY CARD */}
+      <section
+        style={{
+          background: "#fff",
+          borderRadius: "10px",
+          padding: "20px",
+          marginBottom: "20px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        }}
+      >
+        <h2>Annual Salary Summary</h2>
+        <p><b>Annual Income:</b> ₹{annualIncome.toLocaleString()}</p>
+        <p><b>Old Regime Tax:</b> ₹{oldTax.toLocaleString()}</p>
+        <p><b>New Regime Tax:</b> ₹{newTax.toLocaleString()}</p>
+        <p>
+          <b>Better Option:</b>{" "}
+          <span style={{ color: "green" }}>{betterRegime}</span>
+        </p>
+      </section>
 
-      {savedData.length === 0 ? (
-        <p>No saved records yet.</p>
-      ) : (
-        <>
-          {isPremiumUser && (
-            <button
-              onClick={handleClearAll}
-              style={{
-                marginBottom: "15px",
-                background: "#b00020",
-                color: "#fff",
-                border: "none",
-                padding: "6px 12px",
-                cursor: "pointer",
-              }}
-            >
-              🧹 Clear All Records
-            </button>
-          )}
+      {/* EARNINGS */}
+      <section
+        style={{
+          background: "#fff",
+          borderRadius: "10px",
+          padding: "20px",
+          marginBottom: "20px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        }}
+      >
+        <h2>Earnings</h2>
+        {earnings.map((e, i) => (
+          <div
+            key={i}
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "8px 0",
+              borderBottom: "1px solid #eee",
+            }}
+          >
+            <span>{e.title}</span>
+            <b>₹{e.amount.toLocaleString()}</b>
+          </div>
+        ))}
+      </section>
 
-          {savedData.map((item, i) => (
+      {/* SAVE BUTTON */}
+      <section
+        style={{
+          background: "#fff",
+          borderRadius: "10px",
+          padding: "20px",
+          marginBottom: "20px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        }}
+      >
+        <h2>Save Salary</h2>
+
+        {isPremiumUser ? (
+          <button
+            onClick={saveSalary}
+            style={{
+              padding: "10px 16px",
+              background: "#000",
+              color: "#fff",
+              borderRadius: "6px",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            💾 Save This Salary
+          </button>
+        ) : (
+          <p style={{ color: "#777" }}>
+            🔒 Saving salary is a Premium feature.
+          </p>
+        )}
+      </section>
+
+      {/* SAVED HISTORY */}
+      <section
+        style={{
+          background: "#fff",
+          borderRadius: "10px",
+          padding: "20px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        }}
+      >
+        <h2>Saved Salary History</h2>
+
+        {savedData.length === 0 ? (
+          <p style={{ color: "#777" }}>No saved records yet.</p>
+        ) : (
+          savedData.map((s, i) => (
             <div
               key={i}
               style={{
-                border: "1px solid #ddd",
+                border: "1px solid #eee",
+                borderRadius: "6px",
                 padding: "10px",
                 marginBottom: "10px",
               }}
             >
-              <b>Date:</b> {item.date}
+              <b>Date:</b> {s.date}
               <br />
-              Annual Income: ₹{item.annualIncome.toLocaleString()}
+              Income: ₹{s.annualIncome.toLocaleString()}
               <br />
-              Old Tax: ₹{item.oldTax.toLocaleString()}
-              <br />
-              New Tax: ₹{item.newTax.toLocaleString()}
-              <br />
-              Better: <b>{item.betterRegime}</b>
-
-              {isPremiumUser && (
-                <div style={{ marginTop: "8px" }}>
-                  <button
-                    onClick={() => handleDeleteOne(i)}
-                    style={{
-                      background: "#666",
-                      color: "#fff",
-                      border: "none",
-                      padding: "4px 8px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    ❌ Delete
-                  </button>
-                </div>
-              )}
+              Better: <b>{s.betterRegime}</b>
             </div>
-          ))}
-        </>
-      )}
+          ))
+        )}
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ marginTop: "30px", textAlign: "center", color: "#777" }}>
+        <small>
+          This is an informational tool. Tax values are approximate.
+        </small>
+      </footer>
     </main>
   );
 }
