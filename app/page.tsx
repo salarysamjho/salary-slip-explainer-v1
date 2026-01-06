@@ -1,28 +1,14 @@
 'use client';
 
-import { useEffect, useState } from "react";
-
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
+import { useState } from "react";
 
 export default function HomePage() {
-  // ===== PREMIUM STATE (NOW DYNAMIC) =====
-  const [isPremiumUser, setIsPremiumUser] = useState(false);
+  // ===== PREMIUM FLAG (FRONTEND ONLY) =====
+  const isPremiumUser = false;
 
   const [viewMode, setViewMode] = useState<"monthly" | "annual">("monthly");
   const [cityType, setCityType] = useState<"X" | "Y" | "Z">("X");
   const [state, setState] = useState<string>("Maharashtra");
-
-  // ===== LOAD RAZORPAY SCRIPT =====
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
 
   // ===== CORE VALUES =====
   const basicPay = 35400;
@@ -72,62 +58,32 @@ export default function HomePage() {
 
   const netSalary = grossSalary - totalDeductions;
 
-  // ===== RAZORPAY HANDLER =====
-  const handleUpgrade = () => {
-    if (!window.Razorpay) {
-      alert("Razorpay not loaded yet");
-      return;
-    }
-
-    const options = {
-      key: "rzp_test_1DP5mmOlF5G5ag", // Razorpay TEST key
-      amount: 9900, // ₹99 in paise
-      currency: "INR",
-      name: "Salary Slip Explainer",
-      description: "Premium Access (Test Mode)",
-      handler: function () {
-        alert("Payment successful (Test Mode)");
-        setIsPremiumUser(true);
-      },
-      prefill: {
-        name: "Test User",
-        email: "test@example.com",
-      },
-      theme: {
-        color: "#000000",
-      },
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.open();
+  // ===== PDF HANDLER =====
+  const handleDownloadPDF = () => {
+    window.print();
   };
 
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
 
-      {/* 🔒 PREMIUM CTA */}
-      {!isPremiumUser && (
-        <div
-          style={{
-            border: "2px solid #f39c12",
-            padding: "12px",
-            marginBottom: "20px",
-            backgroundColor: "#fff8e1",
-            borderRadius: "6px",
-          }}
-        >
-          <b>🔒 Premium Access</b>
-          <p>
-            English: Unlock Government Orders, PDFs and advanced explanations.
-          </p>
-          <p>
-            हिंदी: प्रीमियम लेकर सरकारी आदेश, PDF और एडवांस जानकारी अनलॉक करें।
-          </p>
+      {/* 🔒 PDF DOWNLOAD CTA */}
+      <div
+        style={{
+          border: "2px solid #ccc",
+          padding: "12px",
+          marginBottom: "20px",
+          borderRadius: "6px",
+          backgroundColor: "#f9f9f9",
+        }}
+      >
+        <b>📄 Download Salary Explanation (PDF)</b>
 
+        {isPremiumUser ? (
           <button
-            onClick={handleUpgrade}
+            onClick={handleDownloadPDF}
             style={{
+              marginTop: "10px",
               padding: "8px 14px",
               background: "#000",
               color: "#fff",
@@ -135,10 +91,16 @@ export default function HomePage() {
               cursor: "pointer",
             }}
           >
-            Upgrade to Premium (₹99)
+            Download PDF
           </button>
-        </div>
-      )}
+        ) : (
+          <p style={{ color: "gray" }}>
+            🔒 Premium users only  
+            <br />
+            हिंदी: PDF डाउनलोड केवल प्रीमियम उपयोगकर्ताओं के लिए उपलब्ध है।
+          </p>
+        )}
+      </div>
 
       {/* TOGGLES */}
       <div style={{ marginBottom: "10px" }}>
@@ -183,21 +145,23 @@ export default function HomePage() {
       {/* EARNINGS */}
       <h2>Earnings</h2>
       {earnings.map((e, i) => (
-        <p key={i}>{e.title}: ₹{e.amount.toLocaleString()}</p>
+        <p key={i}>
+          {e.title}: ₹{e.amount.toLocaleString()}
+        </p>
       ))}
 
       {/* DEDUCTIONS */}
       <h2>Deductions</h2>
       {deductions.map((d, i) => (
-        <p key={i}>{d.title}: ₹{d.amount.toLocaleString()}</p>
+        <p key={i}>
+          {d.title}: ₹{d.amount.toLocaleString()}
+        </p>
       ))}
 
-      {/* PREMIUM CONFIRMATION */}
-      {isPremiumUser && (
-        <div style={{ marginTop: "30px", color: "green" }}>
-          ✅ Premium Activated. Government Orders are now unlocked.
-        </div>
-      )}
+      {/* PRINT NOTE */}
+      <p style={{ fontSize: "12px", marginTop: "30px", color: "#555" }}>
+        Note: Use browser print → “Save as PDF” for downloading.
+      </p>
     </main>
   );
 }
