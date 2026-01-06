@@ -7,44 +7,22 @@ export default function HomePage() {
   const isPremiumUser = false;
 
   const [viewMode, setViewMode] = useState<"monthly" | "annual">("monthly");
-  const [cityType, setCityType] = useState<"X" | "Y" | "Z">("X");
-  const [state, setState] = useState<string>("Maharashtra");
 
   // ===== CORE VALUES =====
   const basicPay = 35400;
   const daRate = 0.49;
   const daAmount = Math.round(basicPay * daRate);
 
-  const hraRateMap = { X: 0.30, Y: 0.20, Z: 0.10 };
-  const hraAmount = Math.round(basicPay * hraRateMap[cityType]);
-
-  const professionalTaxMap: Record<string, number> = {
-    Maharashtra: 200,
-    Karnataka: 200,
-    "Tamil Nadu": 208,
-    "West Bengal": 200,
-    Delhi: 0,
-  };
-  const professionalTax = professionalTaxMap[state] ?? 0;
-
-  // ===== EARNINGS =====
   const earnings = [
     { title: "Basic Pay", amount: basicPay },
     { title: "Dearness Allowance (DA)", amount: daAmount },
-    { title: "House Rent Allowance (HRA)", amount: hraAmount },
+    { title: "House Rent Allowance (HRA)", amount: 10620 },
     { title: "Transport Allowance", amount: 3600 },
   ];
 
-  // ===== DEDUCTIONS =====
   const deductions = [
-    {
-      title: "NPS Contribution",
-      amount: Math.round((basicPay + daAmount) * 0.10),
-    },
-    {
-      title: "Professional Tax",
-      amount: professionalTax,
-    },
+    { title: "NPS Contribution", amount: Math.round((basicPay + daAmount) * 0.10) },
+    { title: "Professional Tax", amount: 200 },
   ];
 
   // ===== CALCULATIONS =====
@@ -58,40 +36,48 @@ export default function HomePage() {
 
   const netSalary = grossSalary - totalDeductions;
 
-  // ===== STEP 19: DA / HRA TIMELINE =====
-  const daTimeline = [
+  // ===== STEP 20: TAX DEDUCTIONS DATA =====
+  const taxDeductions = [
     {
-      period: "01 Jan 2023",
-      oldRate: "38%",
-      newRate: "42%",
-      arrears: "Paid from Jan 2023",
+      section: "Standard Deduction",
+      limit: "₹50,000 per year",
+      en:
+        "Standard deduction is a flat deduction available to salaried employees without any investment proof.",
+      hi:
+        "स्टैंडर्ड डिडक्शन वेतनभोगी कर्मचारियों को बिना किसी निवेश प्रमाण के मिलने वाली सीधी छूट है।",
     },
     {
-      period: "01 Jul 2023",
-      oldRate: "42%",
-      newRate: "46%",
-      arrears: "Paid from Jul 2023",
+      section: "Section 80C",
+      limit: "Up to ₹1,50,000 per year",
+      en:
+        "Section 80C allows deduction for investments like PF, PPF, LIC, ELSS, NSC, and tuition fees.",
+      hi:
+        "धारा 80C के अंतर्गत PF, PPF, LIC, ELSS, NSC और बच्चों की ट्यूशन फीस पर टैक्स छूट मिलती है।",
     },
     {
-      period: "01 Jan 2024",
-      oldRate: "46%",
-      newRate: "49%",
-      arrears: "Paid from Jan 2024",
-    },
-  ];
-
-  const hraTimeline = [
-    {
-      period: "7th CPC Implementation",
-      oldRate: "24 / 16 / 8",
-      newRate: "30 / 20 / 10",
-      note: "Revised based on DA threshold",
+      section: "Section 80CCD (NPS)",
+      limit: "₹50,000 (80CCD(1B))",
+      en:
+        "Additional tax benefit is available for NPS contributions over and above Section 80C.",
+      hi:
+        "एनपीएस में निवेश पर धारा 80C से अतिरिक्त ₹50,000 तक की टैक्स छूट मिलती है।",
     },
   ];
 
   return (
     <main style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       <h1>Salary Slip Explainer</h1>
+
+      {/* VIEW MODE */}
+      <div style={{ marginBottom: "15px" }}>
+        <button onClick={() => setViewMode("monthly")}>Monthly</button>
+        <button
+          onClick={() => setViewMode("annual")}
+          style={{ marginLeft: "10px" }}
+        >
+          Annual
+        </button>
+      </div>
 
       {/* SUMMARY */}
       <div style={{ border: "2px solid #000", padding: "15px", marginBottom: "25px" }}>
@@ -101,58 +87,30 @@ export default function HomePage() {
         <p><b>Net Salary:</b> ₹{netSalary.toLocaleString()}</p>
       </div>
 
-      {/* EARNINGS */}
-      <h2>Earnings</h2>
-      {earnings.map((e, i) => (
-        <p key={i}>{e.title}: ₹{e.amount.toLocaleString()}</p>
-      ))}
-
-      {/* DEDUCTIONS */}
-      <h2>Deductions</h2>
-      {deductions.map((d, i) => (
-        <p key={i}>{d.title}: ₹{d.amount.toLocaleString()}</p>
-      ))}
-
-      {/* STEP 19: DA TIMELINE */}
-      <h2>DA Revision Timeline</h2>
+      {/* STEP 20: TAX DEDUCTIONS */}
+      <h2>Income Tax Deductions (India)</h2>
 
       {!isPremiumUser ? (
         <p style={{ color: "gray" }}>
-          🔒 Premium users can view full DA revision history and arrears details.  
+          🔒 Premium users can see detailed tax deduction explanations.  
           <br />
-          हिंदी: डीए संशोधन इतिहास देखने के लिए प्रीमियम आवश्यक है।
+          हिंदी: टैक्स कटौती का पूरा विवरण देखने के लिए प्रीमियम आवश्यक है।
         </p>
       ) : (
-        daTimeline.map((d, i) => (
-          <div key={i} style={{ border: "1px solid #ddd", padding: "10px", marginBottom: "10px" }}>
-            <b>Effective From:</b> {d.period}  
+        taxDeductions.map((t, i) => (
+          <div
+            key={i}
+            style={{
+              border: "1px solid #ddd",
+              padding: "12px",
+              marginBottom: "12px",
+            }}
+          >
+            <b>{t.section}</b>  
             <br />
-            Old Rate: {d.oldRate} → New Rate: {d.newRate}  
-            <br />
-            <b>Arrears:</b> {d.arrears}
-          </div>
-        ))
-      )}
-
-      {/* STEP 19: HRA TIMELINE */}
-      <h2>HRA Revision Timeline</h2>
-
-      {!isPremiumUser ? (
-        <p style={{ color: "gray" }}>
-          🔒 Premium users can view HRA revision details.  
-          <br />
-          हिंदी: एचआरए संशोधन विवरण देखने के लिए प्रीमियम आवश्यक है।
-        </p>
-      ) : (
-        hraTimeline.map((h, i) => (
-          <div key={i} style={{ border: "1px solid #ddd", padding: "10px" }}>
-            <b>{h.period}</b>  
-            <br />
-            Old Rate: {h.oldRate}  
-            <br />
-            New Rate: {h.newRate}  
-            <br />
-            <i>{h.note}</i>
+            <b>Limit:</b> {t.limit}
+            <p>{t.en}</p>
+            <p>{t.hi}</p>
           </div>
         ))
       )}
