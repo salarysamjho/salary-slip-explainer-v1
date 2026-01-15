@@ -9,14 +9,20 @@ type ExtraItem = {
 
 type UserPlan = "free" | "monthly" | "annual";
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function Home() {
-  // ===== CONSTANTS =====
+  // ================= CONSTANTS =================
   const DA_RATE = 0.58;
   const TA_AMOUNT = 3600;
   const DA_ON_TA_RATE = 0.58;
   const HRA_RATES: Record<string, number> = { X: 0.3, Y: 0.2, Z: 0.1 };
 
-  // ===== STATES =====
+  // ================= STATES =================
   const [basicPay, setBasicPay] = useState<number | "">("");
   const [city, setCity] = useState("X");
   const [npsApplicable, setNpsApplicable] = useState(true);
@@ -26,29 +32,20 @@ export default function Home() {
   const [extraDeductions, setExtraDeductions] = useState<ExtraItem[]>([]);
 
   const [calcDone, setCalcDone] = useState(false);
+  const [userPlan, setUserPlan] = useState<UserPlan>("free");
 
-  // 🔐 PREMIUM STATE (DEFAULT FREE)
-  const [userPlan] = useState<UserPlan>("free");
-
-  // ===== HELPERS =====
+  // ================= HELPERS =================
   const explain = (name: string, type: "earning" | "deduction") => {
     const n = name.toLowerCase();
-    if (n.includes("ltc"))
-      return { en: "Leave Travel Concession for travel.", hi: "यात्रा हेतु अवकाश यात्रा रियायत।" };
-    if (n.includes("bonus"))
-      return { en: "Performance-based bonus.", hi: "प्रदर्शन आधारित बोनस।" };
-    if (n.includes("overtime"))
-      return { en: "Extra duty payment.", hi: "अतिरिक्त कार्य भुगतान।" };
-    if (n.includes("tax") || n === "pt")
-      return { en: "Statutory tax deduction.", hi: "कानूनी कर कटौती।" };
-    if (n.includes("loan"))
-      return { en: "Loan recovery.", hi: "ऋण की कटौती।" };
-    if (n.includes("union"))
-      return { en: "Union subscription fee.", hi: "यूनियन सदस्यता शुल्क।" };
+    if (n.includes("ltc")) return { en: "Leave Travel Concession.", hi: "अवकाश यात्रा रियायत।" };
+    if (n.includes("bonus")) return { en: "Performance bonus.", hi: "प्रदर्शन आधारित बोनस।" };
+    if (n.includes("overtime")) return { en: "Overtime payment.", hi: "अतिरिक्त कार्य भुगतान।" };
+    if (n === "pt" || n.includes("tax")) return { en: "Professional Tax.", hi: "प्रोफेशनल टैक्स।" };
+    if (n.includes("union")) return { en: "Union fee.", hi: "यूनियन शुल्क।" };
 
     return {
-      en: type === "earning" ? "Additional earning declared." : "Additional deduction declared.",
-      hi: type === "earning" ? "घोषित अतिरिक्त आय।" : "घोषित अतिरिक्त कटौती।",
+      en: type === "earning" ? "Additional earning." : "Additional deduction.",
+      hi: type === "earning" ? "अतिरिक्त आय।" : "अतिरिक्त कटौती।",
     };
   };
 
@@ -62,7 +59,41 @@ export default function Home() {
     setCalcDone(false);
   };
 
-  // ===== INPUT SCREEN =====
+  // ================= RAZORPAY =================
+  const loadRazorpay = () =>
+    new Promise<boolean>((resolve) => {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+  const pay = async (amount: number, plan: UserPlan) => {
+    const loaded = await loadRazorpay();
+    if (!loaded) {
+      alert("Razorpay SDK failed to load");
+      return;
+    }
+
+    const options = {
+      key: "rzp_test_REPLACE_WITH_YOUR_KEY",
+      amount: amount * 100,
+      currency: "INR",
+      name: "Salary Slip Explainer",
+      description: "Premium Access",
+      handler: function () {
+        alert("Payment Successful (Test Mode)");
+        setUserPlan(plan);
+      },
+      theme: { color: "#1976d2" },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+  };
+
+  // ================= INPUT SCREEN =================
   if (!calcDone) {
     return (
       <div style={{ padding: 24, maxWidth: 900, margin: "auto" }}>
@@ -89,102 +120,44 @@ export default function Home() {
         <input type="number" value={cgeis} onChange={(e) => setCgeis(Number(e.target.value))} />
         <br /><br />
 
-        <h3>Other Earnings (Optional)</h3>
-        {extraEarnings.map((e, i) => (
-          <div key={i}>
-            <input placeholder="Name" value={e.name} onChange={(ev) => {
-              const copy = [...extraEarnings];
-              copy[i].name = ev.target.value;
-              setExtraEarnings(copy);
-            }} />
-            <input type="number" placeholder="Amount" value={e.amount} onChange={(ev) => {
-              const copy = [...extraEarnings];
-              copy[i].amount = Number(ev.target.value);
-              setExtraEarnings(copy);
-            }} />
-          </div>
-        ))}
-        <button onClick={() => setExtraEarnings([...extraEarnings, { name: "", amount: 0 }])}>+ Add Earning</button>
-
-        <h3>Other Deductions (Optional)</h3>
-        {extraDeductions.map((d, i) => (
-          <div key={i}>
-            <input placeholder="Name" value={d.name} onChange={(ev) => {
-              const copy = [...extraDeductions];
-              copy[i].name = ev.target.value;
-              setExtraDeductions(copy);
-            }} />
-            <input type="number" placeholder="Amount" value={d.amount} onChange={(ev) => {
-              const copy = [...extraDeductions];
-              copy[i].amount = Number(ev.target.value);
-              setExtraDeductions(copy);
-            }} />
-          </div>
-        ))}
-        <button onClick={() => setExtraDeductions([...extraDeductions, { name: "", amount: 0 }])}>+ Add Deduction</button>
-
-        <br /><br />
         <button onClick={() => setCalcDone(true)}>Calculate Salary</button>
       </div>
     );
   }
 
-  // ===== CALCULATION =====
+  // ================= CALCULATION =================
   const bp = Number(basicPay);
   const da = bp * DA_RATE;
   const hra = bp * HRA_RATES[city];
   const daOnTA = TA_AMOUNT * DA_ON_TA_RATE;
   const nps = npsApplicable ? (bp + da) * 0.1 : 0;
 
-  const earningsTotal =
-    bp + da + hra + TA_AMOUNT + daOnTA + extraEarnings.reduce((a, b) => a + b.amount, 0);
-
-  const deductionsTotal =
-    nps + Number(cgeis || 0) + extraDeductions.reduce((a, b) => a + b.amount, 0);
-
+  const earningsTotal = bp + da + hra + TA_AMOUNT + daOnTA;
+  const deductionsTotal = nps + Number(cgeis || 0);
   const netSalary = earningsTotal - deductionsTotal;
 
-  // ===== RESULT SCREEN =====
+  // ================= RESULT SCREEN =================
   return (
     <div style={{ padding: 24, maxWidth: 900, margin: "auto" }}>
       <h1>Salary Slip Explainer</h1>
       <h2>Net Salary: ₹{netSalary.toFixed(2)}</h2>
 
-      <h3>Other Earnings</h3>
-      {extraEarnings.map((e, i) => {
-        const exp = explain(e.name, "earning");
-        return (
-          <div key={i}>
-            <b>{e.name}: ₹{e.amount}</b>
-            <p>{exp.en}</p>
-            <p>{exp.hi}</p>
-          </div>
-        );
-      })}
-
-      <h3>Other Deductions</h3>
-      {extraDeductions.map((d, i) => {
-        const exp = explain(d.name, "deduction");
-        return (
-          <div key={i}>
-            <b>{d.name}: ₹{d.amount}</b>
-            <p>{exp.en}</p>
-            <p>{exp.hi}</p>
-          </div>
-        );
-      })}
-
-      {/* 🔒 PREMIUM PLACEHOLDERS */}
-      <div style={{ marginTop: 30, padding: 15, border: "1px dashed red" }}>
+      <div style={{ border: "1px dashed red", padding: 15, marginTop: 20 }}>
         <h3>🔒 Premium Features</h3>
-        <p>• View Govt Orders & Circulars</p>
-        <p>• Download Salary Explanation PDF (₹10)</p>
-        <p>• Historical DA / HRA changes</p>
-        <p>• Save Salary History</p>
 
         {userPlan === "free" && (
-          <button>Unlock Premium (₹149/year or ₹49/month)</button>
+          <>
+            <button onClick={() => pay(149, "annual")}>₹149 / Year</button>
+            <button onClick={() => pay(49, "monthly")} style={{ marginLeft: 10 }}>
+              ₹49 / Month
+            </button>
+            <button onClick={() => pay(10, "free")} style={{ marginLeft: 10 }}>
+              ₹10 / PDF
+            </button>
+          </>
         )}
+
+        {userPlan !== "free" && <p>✅ Premium Unlocked</p>}
       </div>
 
       <br />
