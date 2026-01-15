@@ -7,13 +7,16 @@ type ExtraItem = {
   amount: number;
 };
 
+type UserPlan = "free" | "monthly" | "annual";
+
 export default function Home() {
+  // ===== CONSTANTS =====
   const DA_RATE = 0.58;
   const TA_AMOUNT = 3600;
   const DA_ON_TA_RATE = 0.58;
-
   const HRA_RATES: Record<string, number> = { X: 0.3, Y: 0.2, Z: 0.1 };
 
+  // ===== STATES =====
   const [basicPay, setBasicPay] = useState<number | "">("");
   const [city, setCity] = useState("X");
   const [npsApplicable, setNpsApplicable] = useState(true);
@@ -23,6 +26,31 @@ export default function Home() {
   const [extraDeductions, setExtraDeductions] = useState<ExtraItem[]>([]);
 
   const [calcDone, setCalcDone] = useState(false);
+
+  // 🔐 PREMIUM STATE (DEFAULT FREE)
+  const [userPlan] = useState<UserPlan>("free");
+
+  // ===== HELPERS =====
+  const explain = (name: string, type: "earning" | "deduction") => {
+    const n = name.toLowerCase();
+    if (n.includes("ltc"))
+      return { en: "Leave Travel Concession for travel.", hi: "यात्रा हेतु अवकाश यात्रा रियायत।" };
+    if (n.includes("bonus"))
+      return { en: "Performance-based bonus.", hi: "प्रदर्शन आधारित बोनस।" };
+    if (n.includes("overtime"))
+      return { en: "Extra duty payment.", hi: "अतिरिक्त कार्य भुगतान।" };
+    if (n.includes("tax") || n === "pt")
+      return { en: "Statutory tax deduction.", hi: "कानूनी कर कटौती।" };
+    if (n.includes("loan"))
+      return { en: "Loan recovery.", hi: "ऋण की कटौती।" };
+    if (n.includes("union"))
+      return { en: "Union subscription fee.", hi: "यूनियन सदस्यता शुल्क।" };
+
+    return {
+      en: type === "earning" ? "Additional earning declared." : "Additional deduction declared.",
+      hi: type === "earning" ? "घोषित अतिरिक्त आय।" : "घोषित अतिरिक्त कटौती।",
+    };
+  };
 
   const resetAll = () => {
     setBasicPay("");
@@ -34,51 +62,7 @@ export default function Home() {
     setCalcDone(false);
   };
 
-  const explain = (name: string, type: "earning" | "deduction") => {
-    const n = name.toLowerCase();
-    if (n.includes("ltc"))
-      return {
-        en: "Leave Travel Concession provided for travel expenses.",
-        hi: "यात्रा व्यय के लिए दिया जाने वाला अवकाश यात्रा रियायत।",
-      };
-    if (n.includes("bonus"))
-      return {
-        en: "Performance-based incentive paid by employer.",
-        hi: "नियोक्ता द्वारा दिया गया प्रदर्शन आधारित प्रोत्साहन।",
-      };
-    if (n.includes("overtime"))
-      return {
-        en: "Payment for extra working hours.",
-        hi: "अतिरिक्त कार्य घंटों के लिए भुगतान।",
-      };
-    if (n.includes("tax"))
-      return {
-        en: "Tax deducted as per state law.",
-        hi: "राज्य कानून के अनुसार काटा गया कर।",
-      };
-    if (n.includes("loan"))
-      return {
-        en: "Salary recovery towards loan repayment.",
-        hi: "ऋण चुकौती हेतु वेतन से कटौती।",
-      };
-    if (n.includes("union"))
-      return {
-        en: "Employee union membership contribution.",
-        hi: "कर्मचारी यूनियन सदस्यता शुल्क।",
-      };
-
-    return {
-      en:
-        type === "earning"
-          ? "Additional earning declared by employee."
-          : "Additional deduction declared by employee.",
-      hi:
-        type === "earning"
-          ? "कर्मचारी द्वारा घोषित अतिरिक्त आय।"
-          : "कर्मचारी द्वारा घोषित अतिरिक्त कटौती।",
-    };
-  };
-
+  // ===== INPUT SCREEN =====
   if (!calcDone) {
     return (
       <div style={{ padding: 24, maxWidth: 900, margin: "auto" }}>
@@ -145,6 +129,7 @@ export default function Home() {
     );
   }
 
+  // ===== CALCULATION =====
   const bp = Number(basicPay);
   const da = bp * DA_RATE;
   const hra = bp * HRA_RATES[city];
@@ -159,6 +144,7 @@ export default function Home() {
 
   const netSalary = earningsTotal - deductionsTotal;
 
+  // ===== RESULT SCREEN =====
   return (
     <div style={{ padding: 24, maxWidth: 900, margin: "auto" }}>
       <h1>Salary Slip Explainer</h1>
@@ -170,8 +156,8 @@ export default function Home() {
         return (
           <div key={i}>
             <b>{e.name}: ₹{e.amount}</b>
-            <p>English: {exp.en}</p>
-            <p>हिंदी: {exp.hi}</p>
+            <p>{exp.en}</p>
+            <p>{exp.hi}</p>
           </div>
         );
       })}
@@ -182,12 +168,26 @@ export default function Home() {
         return (
           <div key={i}>
             <b>{d.name}: ₹{d.amount}</b>
-            <p>English: {exp.en}</p>
-            <p>हिंदी: {exp.hi}</p>
+            <p>{exp.en}</p>
+            <p>{exp.hi}</p>
           </div>
         );
       })}
 
+      {/* 🔒 PREMIUM PLACEHOLDERS */}
+      <div style={{ marginTop: 30, padding: 15, border: "1px dashed red" }}>
+        <h3>🔒 Premium Features</h3>
+        <p>• View Govt Orders & Circulars</p>
+        <p>• Download Salary Explanation PDF (₹10)</p>
+        <p>• Historical DA / HRA changes</p>
+        <p>• Save Salary History</p>
+
+        {userPlan === "free" && (
+          <button>Unlock Premium (₹149/year or ₹49/month)</button>
+        )}
+      </div>
+
+      <br />
       <button onClick={resetAll}>Reset</button>
     </div>
   );
